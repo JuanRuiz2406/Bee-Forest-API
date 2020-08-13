@@ -15,7 +15,7 @@ class CreateMaterialsTable extends Migration
     {
         Schema::create('materials', function (Blueprint $table) {
             $table->id();
-            $table->string('providerId',36);
+            $table->uuid('providerId');
             $table->string('name')->unique();
             $table->double('price');
             $table->integer('amount');

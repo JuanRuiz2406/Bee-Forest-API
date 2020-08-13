@@ -15,8 +15,8 @@ class CreateOrdersTable extends Migration
     {
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
-            $table->string('collaboratorId',36);
-            $table->string('clientId',36);
+            $table->uuid('collaboratorId');
+            $table->uuid('clientId');
             $table->bigInteger('ShippingId')->unsigned();
             $table->datetime('creationDate');
             $table->datetime('deliveryDate');
