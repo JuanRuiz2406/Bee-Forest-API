@@ -49,14 +49,16 @@ class CollaboratorController extends Controller{
                 $params_array['created_at'] = new \DateTime();
                 $params_array['updated_at'] = new \DateTime();
 
-                DB::insert('insert into collaborators (id, username, email, password, role, created_at, updated_at) values (?,?,?,?,?,?,?)', [
-                    $params_array['id'],
-                    $params_array['username'],
-                    $params_array['email'],
-                    $params_array['password'],
-                    $params_array['role'],
-                    $params_array['created_at'],
-                    $params_array['updated_at']
+                DB::insert('INSERT 
+                                INTO collaborators (id, username, email, password, role, created_at, updated_at) 
+                                VALUES (?,?,?,?,?,?,?)', [
+                                        $params_array['id'],
+                                        $params_array['username'],
+                                        $params_array['email'],
+                                        $params_array['password'],
+                                        $params_array['role'],
+                                        $params_array['created_at'],
+                                        $params_array['updated_at']
                 ]);
 
                 $data = array(
@@ -89,7 +91,6 @@ class CollaboratorController extends Controller{
         // Validar esos datos
         $validate = \Validator::make($params_array, [
             'email' => 'required|email',
-            'username' => 'required',
             'password' => 'required'
         ]);
 
@@ -153,7 +154,8 @@ class CollaboratorController extends Controller{
             $params_array['password'] = $pwd;
             $params_array['updated_at'] = new \DateTime();
 
-            DB::update('update collaborators set  username = ?, email = ?, password = ?, updated_at = ? where id = ?', [
+            DB::update('UPDATE collaborators SET  username = ?, email = ?, password = ?, updated_at = ? 
+                        WHERE id = ?', [
                 $params_array['username'],
                 $params_array['email'],
                 $params_array['password'],

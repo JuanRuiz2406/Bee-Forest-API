@@ -9,8 +9,7 @@ class JwtAuth
 
     public $key;
 
-    public function __construct()
-    {
+    public function __construct(){
         $this->key = 'Proyecto_Bee_Forest_APIREST_creada_por_el_team_Juan_Marco_Diego_Elvin_2020';
     }
 
@@ -18,11 +17,12 @@ class JwtAuth
     {
 
             $collaborator = DB::select(
-                'select *, CONVERT(nvarchar(36), collaborators.id) as id from collaborators where email = :email and password = :password',
-                [
-                    "email" => $email,
-                    "password" => $password
-                ]
+                'SELECT CONVERT(nvarchar(36), collaborators.id) AS id, username, email, role 
+                    FROM collaborators 
+                    WHERE email = :email AND password = :password',[
+                        "email" => $email,
+                        "password" => $password 
+                        ]
             );
 
             // Comprobar si son correctas(objeto)
