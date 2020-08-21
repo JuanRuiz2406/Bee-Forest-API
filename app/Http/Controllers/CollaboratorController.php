@@ -45,15 +45,14 @@ class CollaboratorController extends Controller{
 
                 $params_array['id'] = Uuid::generate()->string;
                 $params_array['password'] = $pwd;
-                $params_array['role'] = 'ROLE_COLLABORATOR';
+                $params_array['role'] = 'ROLE_ADMIN';
                 $params_array['created_at'] = new \DateTime();
                 $params_array['updated_at'] = new \DateTime();
 
                 DB::insert('INSERT 
-                                INTO collaborators (id, username, email, password, role, created_at, updated_at) 
-                                VALUES (?,?,?,?,?,?,?)', [
+                                INTO collaborators (id, email, password, role, created_at, updated_at) 
+                                VALUES (?,?,?,?,?,?)', [
                                         $params_array['id'],
-                                        $params_array['username'],
                                         $params_array['email'],
                                         $params_array['password'],
                                         $params_array['role'],
@@ -137,7 +136,6 @@ class CollaboratorController extends Controller{
             // Validar datos
             $validate = \Validator::make($params_array, [
                 'email' => 'required|email|unique:collaborators' . $collaborator->id,
-                'username' => 'required|email|unique:collaborators' . $collaborator->id,
                 'password' => 'required',
             ]);
 
@@ -154,13 +152,12 @@ class CollaboratorController extends Controller{
             $params_array['password'] = $pwd;
             $params_array['updated_at'] = new \DateTime();
 
-            DB::update('UPDATE collaborators SET  username = ?, email = ?, password = ?, updated_at = ? 
+            DB::update('UPDATE collaborators SET email = ?, password = ?, updated_at = ? 
                         WHERE id = ?', [
-                $params_array['username'],
-                $params_array['email'],
-                $params_array['password'],
-                $params_array['updated_at'],
-                $params_array['id']
+                            $params_array['email'],
+                            $params_array['password'],
+                            $params_array['updated_at'],
+                            $params_array['id']
             ]);
 
             // Devolver array con resultado

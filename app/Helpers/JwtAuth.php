@@ -17,7 +17,7 @@ class JwtAuth
     {
 
             $collaborator = DB::select(
-                'SELECT CONVERT(nvarchar(36), collaborators.id) AS id, username, email, role 
+                'SELECT CONVERT(nvarchar(36), collaborators.id) AS id, email, role 
                     FROM collaborators 
                     WHERE email = :email AND password = :password',[
                         "email" => $email,
@@ -29,7 +29,6 @@ class JwtAuth
             if (count($collaborator) > 0) {
                 $token = array(
                     'id'      =>      $collaborator[0]->id,
-                    'username'   =>   $collaborator[0]->username,
                     'email'    =>     $collaborator[0]->email,
                     'role'    =>      $collaborator[0]->role,
                     'iat'     =>      time(),
