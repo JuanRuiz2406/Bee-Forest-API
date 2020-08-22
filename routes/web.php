@@ -1,7 +1,8 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-
+// Cargando clases
+use App\Http\Middleware\ApiAuthMiddleware;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -20,5 +21,7 @@ Route::get('/', function () {
 Route::post('/api/collaborator/register', 'CollaboratorController@register');
 Route::post('/api/collaborator/login', 'CollaboratorController@login');
 Route::put('/api/collaborator/update', 'CollaboratorController@update');
+Route::delete('/api/collaborator/delete/{id}', 'CollaboratorController@destroy')->middleware(ApiAuthMiddleware::class);
+Route::get('/api/collaborator/detail/{id}', 'CollaboratorController@detail')->middleware(ApiAuthMiddleware::class);
 
 Route::resource('/api/product', 'ProductController'); //CRUD

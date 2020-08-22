@@ -25,7 +25,9 @@ class CollaboratorController extends Controller{
 
             // Validar datos
             $validate = \Validator::make($params_array, [
-                'email' => 'required|email|unique:collaborators',
+                'username' => 'required|unique:collaborators',
+                'email' => 'required|email',
+                'role' => 'required',
                 'password' => 'required',
             ]);
 
@@ -45,16 +47,16 @@ class CollaboratorController extends Controller{
 
                 $params_array['id'] = Uuid::generate()->string;
                 $params_array['password'] = $pwd;
-                $params_array['role'] = 'ROLE_ADMIN';
                 $params_array['created_at'] = new \DateTime();
                 $params_array['updated_at'] = new \DateTime();
 
                 DB::insert('INSERT 
-                                INTO collaborators (id, email, password, role, created_at, updated_at) 
-                                VALUES (?,?,?,?,?,?)', [
+                                INTO collaborators (id, username, password, email, role, created_at, updated_at) 
+                                VALUES (?,?,?,?,?,?,?)', [
                                         $params_array['id'],
-                                        $params_array['email'],
+                                        $params_array['username'],
                                         $params_array['password'],
+                                        $params_array['email'],
                                         $params_array['role'],
                                         $params_array['created_at'],
                                         $params_array['updated_at']
@@ -89,7 +91,7 @@ class CollaboratorController extends Controller{
 
         // Validar esos datos
         $validate = \Validator::make($params_array, [
-            'email' => 'required|email',
+            'username' => 'required',
             'password' => 'required'
         ]);
 
@@ -106,10 +108,10 @@ class CollaboratorController extends Controller{
             $pwd = hash('sha256', $params->password);
 
             // Devolver token o datos
-            $signup = $jwtAuth->signup($params->email, $pwd);
+            $signup = $jwtAuth->signup($params->username, $pwd);
 
             if (!empty($params->gettoken)) {
-                $signup = $jwtAuth->signup($params->email, $pwd, true);
+                $signup = $jwtAuth->signup($params->username, $pwd, true);
             }
         }
 
@@ -131,30 +133,46 @@ class CollaboratorController extends Controller{
 
             // Optener colaborador identificado
             $collaborator = $jwtAuth->checkToken($token, true);
-
             $params_array =  (array) $params;
             // Validar datos
             $validate = \Validator::make($params_array, [
-                'email' => 'required|email|unique:collaborators' . $collaborator->id,
+                'username' => 'required|unique:collaborators' . $collaborator->id,
+                'email' => 'required|email',
                 'password' => 'required',
             ]);
 
+            $unique = DB::select('select username, email from collaborators where username = ? ', [$params->username]);
+
+            if (count($unique) > 0) {
+                $data = array(
+                    'code' => 404,
+                    'status' => 'error',
+                    'data' => 'El usuario ya existe'
+                );
+            return response()->json($data, $data['code']);
+            }
+           
             //En angular validar si se modifica o no la contraseña
             $pwd = hash('sha256', $params->password);
             $params->password = $pwd;
 
             // Quitar los campos que no quiero actualizar
             unset($params_array['id']);
-            unset($params_array['role']);
             unset($params_array['created_at']);
+            
+            if($collaborator->username == 'admin'){
+                $params_array['username'] = 'admin';
+            }
 
             $params_array['id'] = $collaborator->id;
             $params_array['password'] = $pwd;
             $params_array['updated_at'] = new \DateTime();
 
-            DB::update('UPDATE collaborators SET email = ?, password = ?, updated_at = ? 
+            DB::update('UPDATE collaborators SET email = ?, username = ?, role = ?, password = ?, updated_at = ? 
                         WHERE id = ?', [
                             $params_array['email'],
+                            $params_array['username'],
+                            $params_array['role'],
                             $params_array['password'],
                             $params_array['updated_at'],
                             $params_array['id']
@@ -173,6 +191,64 @@ class CollaboratorController extends Controller{
                 'status' => 'error',
                 'data' => 'El colaborador no está identificado.'
             );
+        }
+
+        return response()->json($data, $data['code']);
+    }
+
+   public function detail($id) {
+
+        $collaborator = DB::select('select CONVERT(nvarchar(36), collaborators.id) AS id, username, email, role from collaborators where id = ?', [$id]);
+
+        if (count($collaborator) > 0) {
+            $data = array(
+                'code' => 200,
+                'status' => 'success',
+                'data' => $collaborator
+            );
+        } else {
+            $data = array(
+                'code' => 404,
+                'status' => 'error',
+                'data' => 'El colaborador no existe.'
+            );
+        }
+
+        return response()->json($data, $data['code']);
+    }
+
+    public function destroy($id){
+
+        $collaborator = DB::select('select CONVERT(nvarchar(36), collaborators.id) AS id, username, email, role from collaborators where id = ?', [$id]);
+
+        if (count($collaborator) > 0) {
+           
+            if($collaborator[0]->username != 'admin'){
+               
+                DB::delete('delete from collaborators where id=?', [$id]);
+
+                // Devolver algo
+                $data = [
+                    'code' => 200,
+                    'status' => 'success',
+                    'data' => $collaborator
+                ];
+
+            }else{
+
+                $data = [
+                    'code' => 404,
+                    'status' => 'error',
+                    'data' => 'Usuario admin no se puede eliminar'
+                ];
+            }
+   
+        } else {
+            $data = [
+                'code' => 404,
+                'status' => 'error',
+                'data' => 'El colaborador no existe'
+            ];
         }
 
         return response()->json($data, $data['code']);

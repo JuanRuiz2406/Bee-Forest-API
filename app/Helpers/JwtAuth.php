@@ -13,14 +13,14 @@ class JwtAuth
         $this->key = 'Proyecto_Bee_Forest_APIREST_creada_por_el_team_Juan_Marco_Diego_Elvin_2020';
     }
 
-    public function signup($email, $password, $getToken = null)
+    public function signup($username, $password, $getToken = null)
     {
 
             $collaborator = DB::select(
-                'SELECT CONVERT(nvarchar(36), collaborators.id) AS id, email, role 
+                'SELECT CONVERT(nvarchar(36), collaborators.id) AS id, username, email, role
                     FROM collaborators 
-                    WHERE email = :email AND password = :password',[
-                        "email" => $email,
+                    WHERE username = :username AND password = :password',[
+                        "username" => $username,
                         "password" => $password 
                         ]
             );
@@ -28,11 +28,12 @@ class JwtAuth
             // Comprobar si son correctas(objeto)
             if (count($collaborator) > 0) {
                 $token = array(
-                    'id'      =>      $collaborator[0]->id,
-                    'email'    =>     $collaborator[0]->email,
-                    'role'    =>      $collaborator[0]->role,
-                    'iat'     =>      time(),
-                    'exp'     =>      time() + (30 * 24 * 60 * 60) //expiracion de un mes
+                    'id'       =>      $collaborator[0]->id,
+                    'username' =>      $collaborator[0]->username,
+                    'email'    =>      $collaborator[0]->email,
+                    'role'     =>      $collaborator[0]->role,
+                    'iat'      =>      time(),
+                    'exp'      =>      time() + (30 * 24 * 60 * 60) //expiracion de un mes
                 );
             
               // Generar el token con los datos del colaborador idenficado

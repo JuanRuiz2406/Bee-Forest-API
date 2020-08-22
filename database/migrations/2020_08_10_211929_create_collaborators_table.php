@@ -15,8 +15,9 @@ class CreateCollaboratorsTable extends Migration
     {
         Schema::create('collaborators', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->string('email')->unique();
+            $table->string('username')->unique();
             $table->string('password');
+            $table->string('email');
             $table->string('role');
             $table->timestamps();
         });
