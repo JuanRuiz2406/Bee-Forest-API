@@ -20,3 +20,5 @@ Route::get('/', function () {
 Route::post('/api/collaborator/register', 'CollaboratorController@register');
 Route::post('/api/collaborator/login', 'CollaboratorController@login');
 Route::put('/api/collaborator/update', 'CollaboratorController@update');
+
+Route::resource('/api/product', 'ProductController'); //CRUD
