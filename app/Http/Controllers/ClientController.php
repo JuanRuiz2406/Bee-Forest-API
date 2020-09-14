@@ -8,9 +8,8 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB; // Con esto podemos hacer consultas por sql
 use Uuid; //Generamos ID unico para cada registro
 
-class DirectionController extends Controller
+class ClientController extends Controller
 {
-
     public function __construct()
     {
         //$this->middleware('api.auth', ['except' => ['index', 'show']]);
@@ -27,17 +26,18 @@ class DirectionController extends Controller
 
             //validar datos
             $validate = \Validator::make($params_array, [
-                'country' => 'required',
-                'province' => 'required',
-                'city' => 'required',
-                'direction' => 'required',
+                'identificationCard' => 'required',
+                'name' => 'required',
+                'surname' => 'required',
+                'telephone' => 'required',
+                'email' => 'required'
             ]);
 
             if ($validate->fails()) {
                 $data = array(
                     'status' => 'error',
                     'code' => 404,
-                    'message' => 'La direccion no se a guardado',
+                    'message' => 'El cliente no se a guardado',
                     'data' => $validate->errors()
                 );
             } else {
@@ -46,13 +46,12 @@ class DirectionController extends Controller
                 $params_array['created_at'] = new \DateTime();
                 $params_array['updated_at'] = new \DateTime();
 
-                DB::select('exec pa_saveDirection ?,?,?,?,?,?,?,?', [
-                    $params_array['clientId'],
-                    $params_array['country'],
-                    $params_array['province'],
-                    $params_array['city'],
-                    $params_array['zipCode'],
-                    $params_array['direction'],
+                DB::select('exec pa_saveClient ?,?,?,?,?,?,?', [
+                    $params_array['identificationCard'],
+                    $params_array['name'],
+                    $params_array['surname'],
+                    $params_array['telephone'],
+                    $params_array['email'],
                     $params_array['created_at'],
                     $params_array['updated_at']
                 ]);
@@ -77,29 +76,29 @@ class DirectionController extends Controller
 
     public function index()
     {
-        $directions = DB::select('select * from v_ListaDirection');
+        $clients = DB::select('select * from v_ListaClients');
 
         return response()->json([
             'code' => 200,
             'status' => 'success',
-            'data' => $directions
+            'data' => $clients
         ]);
     }
 
-    public function show($clientId)
+    public function show($Id)
     {
-        $direction = DB::select('select * from direction where ', $clientId);
+        $client = DB::select('select * from client where ', $Id);
         if (is_object($direction)) {
             $data = [
                 'code' => 200,
-                'status' => 'Direcion encontrada correctamente',
-                'data' => $direction
+                'status' => 'Cliente encontrada correctamente',
+                'data' => $client
             ];
         } else {
             $data = [
                 'code' => 400,
                 'status' => 'error',
-                'data' => 'Cliente no cuenta con direciones'
+                'data' => 'Cliente no encontrado'
             ];
         }
 
@@ -116,18 +115,18 @@ class DirectionController extends Controller
             $collaborator = $this->getIdentity($request);
 
             $validate = \Validator::make($params_array, [
-                'id' => 'required',
-                'country' => 'required',
-                'province' => 'required',
-                'city' => 'required',
-                'direction' => 'required',
+                'identificationCard' => 'required',
+                'name' => 'required',
+                'surname' => 'required',
+                'telephone' => 'required',
+                'email' => 'required'
             ]);
 
             if ($validate->fails()) {
                 $data = [
                     'code' => 400,
                     'status' => 'error',
-                    'message' => 'No se ha actualizado la direccion, faltan datos',
+                    'message' => 'No se ha actualizado el cliente, faltan datos',
                     'data' => $validate->errors()
                 ];
             } else {
@@ -136,13 +135,12 @@ class DirectionController extends Controller
                 unset($params_array['created_at']);
                 $params_array['updated_at'] = new \DateTime();
 
-                DB::update('exec pa_updateDirection ?,?,?,?,?,?,?', [
-                    $params_array['clientId'],
-                    $params_array['country'],
-                    $params_array['province'],
-                    $params_array['city'],
-                    $params_array['zipCode'],
-                    $params_array['direction'],
+                DB::update('exec pa_updateClient ?,?,?,?,?,?', [
+                    $params_array['identificationCard'],
+                    $params_array['name'],
+                    $params_array['surname'],
+                    $params_array['telephone'],
+                    $params_array['email'],
                     $params_array['updated_at']
                 ]);
 
@@ -163,10 +161,10 @@ class DirectionController extends Controller
         return response()->json($data, $data['code']);
     }
 
-    public function destroy($id)
+    public function destroy($idCard)
     {
         if (isset($id)) {
-            $delete = DB::delete('exec pa_deleteDirection ?', $id);
+            $delete = DB::delete('exec pa_deleteMaterial ?', $idCard);
             if ($delete) {
                 $data = [
                     'code' => 200,
@@ -184,7 +182,7 @@ class DirectionController extends Controller
             $data = [
                 'code' => 400,
                 'status' => 'error',
-                'data' => 'No se encontro la direccion'
+                'data' => 'No se encontro el cliente'
             ];
         }
 

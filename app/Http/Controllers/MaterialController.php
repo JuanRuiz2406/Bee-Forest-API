@@ -29,7 +29,7 @@ class MaterialController extends Controllers
                 'providerId' => 'required',
                 'name' => 'required',
                 'price' => 'required',
-                'amount' => 'requered'
+                'amount' => 'required'
             ]);
 
             if ($validate->fails()) {
@@ -86,7 +86,7 @@ class MaterialController extends Controllers
 
     public function show($providerId)
     {
-        $materials = DB::select('select * from direction where ', $providerId);
+        $materials = DB::select('select * from material where ', $providerId);
         if (is_object($materials)) {
             $data = [
                 'code' => 200,
@@ -117,7 +117,7 @@ class MaterialController extends Controllers
                 'providerId' => 'required',
                 'name' => 'required',
                 'price' => 'required',
-                'amount' => 'requered'
+                'amount' => 'required'
             ]);
 
             if ($validate->fails()) {
@@ -130,7 +130,7 @@ class MaterialController extends Controllers
             } else {
                 $id = $params_array['id'];
                 unset($params_array['id']);
-                unset($params_array['id']);
+                unset($params_array['created_at']);
                 $params_array['updated_at'] = new \DateTime();
 
                 DB::update('exec pa_updateMaterial ?,?,?,?,?,?', [
