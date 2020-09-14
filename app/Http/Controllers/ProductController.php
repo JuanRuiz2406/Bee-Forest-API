@@ -12,7 +12,7 @@ class ProductController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('api.auth', ['except' => ['index','show']]);
+        $this->middleware('api.auth', ['except' => ['index', 'show']]);
     }
 
     public function index()
@@ -56,10 +56,10 @@ class ProductController extends Controller
                     'data' => $validate->errors()
                 ];
             } else {
-       
+
                 $params_array['created_at'] = new \DateTime();
                 $params_array['updated_at'] = new \DateTime();
-                    
+
                 DB::select('exec pa_saveProduct ?,?,?,?,?,?,?,?', [
                     $params_array['categoryId'],
                     $params_array['name'],
@@ -97,5 +97,4 @@ class ProductController extends Controller
 
         return $client;
     }
-
 }

@@ -9,10 +9,11 @@ class Shipping extends Model
     protected $table = 'shippings';
 
     protected $fillable = [
-        'name','price','description'
+        'name', 'price', 'description'
     ];
 
-    public function order(){
+    public function order()
+    {
         return $this->hasMany('App\Order');
     }
 }
