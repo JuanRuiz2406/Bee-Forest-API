@@ -17,7 +17,7 @@ class ProductController extends Controller
 
     public function index()
     {
-        $products = DB::select('select * from v_ListaProductosMielCremada');
+        $products = DB::select('exec pa_readProducts');
 
         return response()->json([
             'code' => 200,
@@ -60,7 +60,7 @@ class ProductController extends Controller
                 $params_array['created_at'] = new \DateTime();
                 $params_array['updated_at'] = new \DateTime();
 
-                DB::select('exec pa_saveProduct ?,?,?,?,?,?,?,?', [
+                DB::insert('exec pa_addProducts ?,?,?,?,?,?,?,?', [
                     $params_array['categoryId'],
                     $params_array['name'],
                     $params_array['price'],

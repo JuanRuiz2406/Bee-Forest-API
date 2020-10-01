@@ -25,3 +25,4 @@ Route::delete('/api/collaborator/delete/{id}', 'CollaboratorController@destroy')
 Route::get('/api/collaborator/detail/{id}', 'CollaboratorController@detail')->middleware(ApiAuthMiddleware::class);
 
 Route::resource('/api/product', 'ProductController'); //CRUD
+Route::resource('/api/client', 'ClientController'); //CRUD

@@ -46,7 +46,7 @@ class DirectionController extends Controller
                 $params_array['created_at'] = new \DateTime();
                 $params_array['updated_at'] = new \DateTime();
 
-                DB::select('exec pa_saveDirection ?,?,?,?,?,?,?,?', [
+                DB::insert('exec pa_addDirection ?,?,?,?,?,?,?,?', [
                     $params_array['clientId'],
                     $params_array['country'],
                     $params_array['province'],
@@ -77,7 +77,7 @@ class DirectionController extends Controller
 
     public function index()
     {
-        $directions = DB::select('select * from v_ListaDirection');
+        $directions = DB::select('exec pa_readDirections');
 
         return response()->json([
             'code' => 200,
@@ -88,7 +88,7 @@ class DirectionController extends Controller
 
     public function show($clientId)
     {
-        $direction = DB::select('select * from direction where ', $clientId);
+        $direction = DB::select('exec pa_selectDirections ?', $clientId);
         if (is_object($direction)) {
             $data = [
                 'code' => 200,
@@ -166,7 +166,7 @@ class DirectionController extends Controller
     public function destroy($id)
     {
         if (isset($id)) {
-            $delete = DB::delete('exec pa_deleteDirection ?', $id);
+            $delete = DB::delete('exec pa_deleteDirections ?', $id);
             if ($delete) {
                 $data = [
                     'code' => 200,

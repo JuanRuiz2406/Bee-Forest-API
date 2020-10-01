@@ -46,7 +46,7 @@ class ClientController extends Controller
                 $params_array['created_at'] = new \DateTime();
                 $params_array['updated_at'] = new \DateTime();
 
-                DB::select('exec pa_saveClient ?,?,?,?,?,?,?', [
+                DB::insert('exec pa_addClient ?,?,?,?,?,?,?', [
                     $params_array['identificationCard'],
                     $params_array['name'],
                     $params_array['surname'],
@@ -76,7 +76,7 @@ class ClientController extends Controller
 
     public function index()
     {
-        $clients = DB::select('select * from v_ListaClients');
+        $clients = DB::select('exec pa_readClients');
 
         return response()->json([
             'code' => 200,
@@ -87,11 +87,11 @@ class ClientController extends Controller
 
     public function show($Id)
     {
-        $client = DB::select('select * from client where ', $Id);
+        $client = DB::select('exec pa_selectClients', $Id);
         if (is_object($direction)) {
             $data = [
                 'code' => 200,
-                'status' => 'Cliente encontrada correctamente',
+                'status' => 'Cliente encontrado correctamente',
                 'data' => $client
             ];
         } else {
@@ -164,7 +164,7 @@ class ClientController extends Controller
     public function destroy($idCard)
     {
         if (isset($id)) {
-            $delete = DB::delete('exec pa_deleteMaterial ?', $idCard);
+            $delete = DB::delete('exec pa_deleteClients ?', $idCard);
             if ($delete) {
                 $data = [
                     'code' => 200,
@@ -193,7 +193,7 @@ class ClientController extends Controller
     {
         $jwtAuth = new JwtAuth();
         $token = $request->header('Authorization', null);
-        $client = $jwtAuth->checkToken($token, true);
+        $collaborator = $jwtAuth->checkToken($token, true);
 
         return $client;
     }

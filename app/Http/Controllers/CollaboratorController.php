@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\DB; // Con esto podemos hacer consultas por sql
 use Uuid; //Generamos ID unico para cada registro
 
 class CollaboratorController extends Controller{
-    
+
     public function register(Request $request)
     {
 
@@ -50,16 +50,14 @@ class CollaboratorController extends Controller{
                 $params_array['created_at'] = new \DateTime();
                 $params_array['updated_at'] = new \DateTime();
 
-                DB::insert('INSERT 
-                                INTO collaborators (id, username, password, email, role, created_at, updated_at) 
-                                VALUES (?,?,?,?,?,?,?)', [
-                                        $params_array['id'],
-                                        $params_array['username'],
-                                        $params_array['password'],
-                                        $params_array['email'],
-                                        $params_array['role'],
-                                        $params_array['created_at'],
-                                        $params_array['updated_at']
+                DB::insert('exec pa_addColaborator ?,?,?,?,?,?,?', [
+                    $params_array['id'],
+                    $params_array['username'],
+                    $params_array['password'],
+                    $params_array['email'],
+                    $params_array['role'],
+                    $params_array['created_at'],
+                    $params_array['updated_at']
                 ]);
 
                 $data = array(
@@ -79,7 +77,7 @@ class CollaboratorController extends Controller{
 
         return response()->json($data, $data['code']);
     }
-    
+
     public function login(Request $request){
 
         $jwtAuth = new \JwtAuth();
@@ -151,7 +149,7 @@ class CollaboratorController extends Controller{
                 );
             return response()->json($data, $data['code']);
             }
-           
+
             //En angular validar si se modifica o no la contraseña
             $pwd = hash('sha256', $params->password);
             $params->password = $pwd;
@@ -159,7 +157,7 @@ class CollaboratorController extends Controller{
             // Quitar los campos que no quiero actualizar
             unset($params_array['id']);
             unset($params_array['created_at']);
-            
+
             if($collaborator->username == 'admin'){
                 $params_array['username'] = 'admin';
             }
@@ -168,8 +166,7 @@ class CollaboratorController extends Controller{
             $params_array['password'] = $pwd;
             $params_array['updated_at'] = new \DateTime();
 
-            DB::update('UPDATE collaborators SET email = ?, username = ?, role = ?, password = ?, updated_at = ? 
-                        WHERE id = ?', [
+            DB::update('exec pa_updateCollaborator ?, ?, ?, ?, ?, ?', [
                             $params_array['email'],
                             $params_array['username'],
                             $params_array['role'],
@@ -197,8 +194,9 @@ class CollaboratorController extends Controller{
     }
 
    public function detail($id) {
-
-        $collaborator = DB::select('select CONVERT(nvarchar(36), collaborators.id) AS id, username, email, role from collaborators where id = ?', [$id]);
+// SI???
+//        $collaborator = DB::select('select CONVERT(nvarchar(36), collaborators.id) AS id, username, email, role from collaborators where id = ?', [$id]);
+        $collaborator = DB::select('exec pa_selectCollaborators ?', [$id]);
 
         if (count($collaborator) > 0) {
             $data = array(
@@ -222,10 +220,10 @@ class CollaboratorController extends Controller{
         $collaborator = DB::select('select CONVERT(nvarchar(36), collaborators.id) AS id, username, email, role from collaborators where id = ?', [$id]);
 
         if (count($collaborator) > 0) {
-           
+
             if($collaborator[0]->username != 'admin'){
-               
-                DB::delete('delete from collaborators where id=?', [$id]);
+
+                DB::delete('exec pa_deleteCollaborators ?', [$id]);
 
                 // Devolver algo
                 $data = [
@@ -242,7 +240,7 @@ class CollaboratorController extends Controller{
                     'data' => 'Usuario admin no se puede eliminar'
                 ];
             }
-   
+
         } else {
             $data = [
                 'code' => 404,

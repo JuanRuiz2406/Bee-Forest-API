@@ -45,7 +45,7 @@ class MaterialController extends Controllers
                 $params_array['created_at'] = new \DateTime();
                 $params_array['updated_at'] = new \DateTime();
 
-                DB::select('exec pa_saveMaterial ?,?,?,?,?,?,?', [
+                DB::insert('exec pa_addMaterials ?,?,?,?,?,?,?', [
                     $params_array['ProviderId'],
                     $params_array['name'],
                     $params_array['price'],
@@ -75,7 +75,7 @@ class MaterialController extends Controllers
 
     public function index()
     {
-        $materials = DB::select('select * from v_ListaMaterials');
+        $materials = DB::select('exec pa_readMaterials');
 
         return response()->json([
             'code' => 200,
@@ -86,7 +86,7 @@ class MaterialController extends Controllers
 
     public function show($providerId)
     {
-        $materials = DB::select('select * from material where ', $providerId);
+        $materials = DB::select('exec pa_selectMaterial ?', $providerId);
         if (is_object($materials)) {
             $data = [
                 'code' => 200,
