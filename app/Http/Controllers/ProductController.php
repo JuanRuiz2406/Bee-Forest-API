@@ -89,6 +89,109 @@ class ProductController extends Controller
         return response()->json($data, $data['code']);
     }
 
+    public function show($productId)
+    {
+        $product = DB::select('exec pa_selectProduct ?', $productId);
+        if (is_object($product)) {
+            $data = [
+                'code' => 200,
+                'status' => 'Producto encontrado correctamente',
+                'data' => $product
+            ];
+        } else {
+            $data = [
+                'code' => 400,
+                'status' => 'error',
+                'data' => 'Producto no encontrado o id de producto no existe'
+            ];
+        }
+
+
+        return response()->json($data, $data['code']);
+    }
+
+    public function update(Request $request)
+    {
+        $json = $request->input('json', null);
+        $params = json_decode($json);
+        $params_array = json_decode($json, true);
+
+        if (!empty($params_array)) {
+            $validate = \Validator::make(
+                $params_array,
+                [
+                    'id' => 'required',
+                    'name' => 'required'
+                ]
+            );
+
+            if ($validate->fails()) {
+                $data = [
+                    'code' => 400,
+                    'status' => 'error',
+                    'message' => 'No se ha actualizado el producto, faltan datos',
+                    'data' => $validate->errors()
+                ];
+            } else {
+                unset($params_array['id']);
+                unset($params_array['created_at']);
+                $params_array['updated_at'] = new \DateTime();
+
+                DB::update('exec pa_updateProduct ?,?,?,?,?,?,?', [
+                    $params_array['categoryId'],
+                    $params_array['name'],
+                    $params_array['price'],
+                    $params_array['amount'],
+                    $params_array['description'],
+                    $params_array['image'],
+                    $params_array['updated_at']
+                ]);
+
+                $data = [
+                    'code' => 200,
+                    'status' => 'success',
+                    'data' => $params_array
+                ];
+            }
+        } else {
+            $data = [
+                'code' => 400,
+                'status' => 'error',
+                'data' => 'Envia los datos correctamente'
+            ];
+        }
+
+        return response()->json($data, $data['code']);
+    }
+
+    public function destroy($id)
+    {
+        if (isset($id)) {
+            $delete = DB::delete('exec pa_deleteProduct ?', $id);
+            if ($delete) {
+                $data = [
+                    'code' => 200,
+                    'status' => 'success',
+                    'data' => 'Se elimino correctamente'
+                ];
+            } else {
+                $data = [
+                    'code' => 400,
+                    'status' => 'error',
+                    'data' => 'No se elimino correctamente'
+                ];
+            }
+        } else {
+            $data = [
+                'code' => 400,
+                'status' => 'error',
+                'data' => 'No se encontro el producto'
+            ];
+        }
+
+        return response()->json($data, $data['code']);
+    }
+
     private function getIdentity($request)
     {
         $jwtAuth = new JwtAuth();
