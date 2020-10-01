@@ -8,12 +8,8 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB; // Con esto podemos hacer consultas por sql
 use Uuid; //Generamos ID unico para cada registro
 
-class MaterialController extends Controllers
+class MaterialController extends Controller
 {
-    public function __construct()
-    {
-        //$this->middleware('api.auth', ['except' => ['index', 'show']]);
-    }
 
     public function store(Request $request)
     {

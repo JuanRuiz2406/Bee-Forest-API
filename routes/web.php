@@ -26,3 +26,5 @@ Route::get('/api/collaborator/detail/{id}', 'CollaboratorController@detail')->mi
 
 Route::resource('/api/product', 'ProductController'); //CRUD
 Route::resource('/api/client', 'ClientController'); //CRUD
+Route::resource('/api/material', 'MaterialController');
+Route::resource('/api/direction', 'DirectionController');
