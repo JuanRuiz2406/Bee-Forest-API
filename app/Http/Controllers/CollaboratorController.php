@@ -195,7 +195,7 @@ class CollaboratorController extends Controller{
    public function detail($id) {
 // SI???
 //        $collaborator = DB::select('select CONVERT(nvarchar(36), collaborators.id) AS id, username, email, role from collaborators where id = ?', [$id]);
-        $collaborator = DB::select('exec pa_selectCollaborators ?', [$id]);
+        $collaborator = DB::select('exec pa_selectCollaborator ?', [$id]);
 
         if (count($collaborator) > 0) {
             $data = array(
@@ -249,17 +249,6 @@ class CollaboratorController extends Controller{
         }
 
         return response()->json($data, $data['code']);
-    }
-
- 
-    public function getCollaborator($id){
-        $collaborator = DB::select('exec pa_selectCollaborator ?', [$id]);
-
-        return response()->json([
-            'code' => 200,
-            'status' => 'success',
-            'data' => $collaborator
-        ]);
     }
 
 }

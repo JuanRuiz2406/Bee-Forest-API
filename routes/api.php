@@ -8,6 +8,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\MaterialController;
 use App\Http\Controllers\DirectionController;
+use App\Http\Middleware\ApiAuthMiddleware;
 
 /*
 |--------------------------------------------------------------------------
