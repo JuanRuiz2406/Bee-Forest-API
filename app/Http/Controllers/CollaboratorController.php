@@ -50,7 +50,7 @@ class CollaboratorController extends Controller{
                 $params_array['created_at'] = new \DateTime();
                 $params_array['updated_at'] = new \DateTime();
 
-                DB::insert('exec pa_addColaborator ?,?,?,?,?,?,?', [
+                DB::insert('exec pa_addCollaborator ?,?,?,?,?,?,?', [
                     $params_array['id'],
                     $params_array['username'],
                     $params_array['password'],
@@ -251,10 +251,15 @@ class CollaboratorController extends Controller{
         return response()->json($data, $data['code']);
     }
 
-    public function getAdministrator($id)
-    {
+ 
+    public function getCollaborator($id){
+        $collaborator = DB::select('exec pa_selectCollaborator ?', [$id]);
 
+        return response()->json([
+            'code' => 200,
+            'status' => 'success',
+            'data' => $collaborator
+        ]);
     }
-
 
 }
