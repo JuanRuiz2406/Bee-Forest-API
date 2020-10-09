@@ -17,7 +17,7 @@ class CollaboratorController extends Controller{
         $json = $request->input('json', null);
         $params = json_decode($json); // objeto
         $params_array = json_decode($json, true); // array
-
+    
         if (!empty($params) && !empty($params_array)) {
 
             // Limpiar datos
