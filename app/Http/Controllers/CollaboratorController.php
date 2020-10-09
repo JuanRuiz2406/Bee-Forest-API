@@ -138,9 +138,9 @@ class CollaboratorController extends Controller{
                 'password' => 'required',
             ]);
 
-            $unique = DB::select('select username, email from collaborators where username = ? ', [$params->username]);
+            $unique = DB::select('exec pa_selectUserNameCollaborator ? ', [$params->username]);
 
-            if (count($unique) > 0) {
+            if ((count($unique) > 0) && ($collaborator->username != $unique[0]->username)) {
                 $data = array(
                     'code' => 404,
                     'status' => 'error',
@@ -166,12 +166,12 @@ class CollaboratorController extends Controller{
             $params_array['updated_at'] = new \DateTime();
 
             DB::update('exec pa_updateCollaborator ?, ?, ?, ?, ?, ?', [
-                            $params_array['email'],
+                            $params_array['id'],
                             $params_array['username'],
-                            $params_array['role'],
                             $params_array['password'],
-                            $params_array['updated_at'],
-                            $params_array['id']
+                            $params_array['email'],
+                            $params_array['role'],
+                            $params_array['updated_at']
             ]);
 
             // Devolver array con resultado
@@ -216,13 +216,13 @@ class CollaboratorController extends Controller{
 
     public function destroy($id){
 
-        $collaborator = DB::select('select CONVERT(nvarchar(36), collaborators.id) AS id, username, email, role from collaborators where id = ?', [$id]);
+        $collaborator = DB::select('exec pa_selectCollaborator ?', [$id]);
 
         if (count($collaborator) > 0) {
 
-            if($collaborator[0]->username != 'admin'){
+            if($collaborator[0]->role != 'admin'){
 
-                DB::delete('exec pa_deleteCollaborators ?', [$id]);
+                DB::delete('exec pa_deleteCollaborator ?', [$id]);
 
                 // Devolver algo
                 $data = [
