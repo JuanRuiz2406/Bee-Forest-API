@@ -17,7 +17,7 @@ class CollaboratorController extends Controller{
         $json = $request->input('json', null);
         $params = json_decode($json); // objeto
         $params_array = json_decode($json, true); // array
-    
+
         if (!empty($params) && !empty($params_array)) {
 
             // Limpiar datos
@@ -63,8 +63,7 @@ class CollaboratorController extends Controller{
                 $data = array(
                     'status' => 'success',
                     'code' => 200,
-                    'message' => 'El colaborador se ha registrado correctamente',
-                    'data' => $params_array
+                    'message' => 'El colaborador se ha registrado correctamente'
                 );
             }
         } else {
@@ -251,5 +250,11 @@ class CollaboratorController extends Controller{
 
         return response()->json($data, $data['code']);
     }
+
+    public function getAdministrator($id)
+    {
+
+    }
+
 
 }

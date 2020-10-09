@@ -9,7 +9,11 @@ class Collaborator extends Model
     protected $table='collaborators';
 
     protected $fillable = [
-        'username','password','email','role'
+        'username','email','role'
+    ];
+
+    protected $hidden = [
+        'password'
     ];
 
     public function order(){
