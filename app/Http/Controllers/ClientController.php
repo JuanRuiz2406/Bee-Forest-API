@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB; // Con esto podemos hacer consultas por sql
 use Uuid; //Generamos ID unico para cada registro
 
@@ -22,31 +24,35 @@ class ClientController extends Controller
         $params_array = json_decode($json, true);
 
         if (!empty($params) && !empty($params_array)) {
-            $collaborator = $this->getIdentity($request);
-
-            //validar datos
-            $validate = \Validator::make($params_array, [
-                'identificationCard' => 'required',
+          
+              // Validar datos
+              $validate = \Validator::make($params_array, [
+                'identificationCard' => 'required|unique:clients',
                 'name' => 'required',
                 'surname' => 'required',
                 'telephone' => 'required',
-                'email' => 'required'
+                'email' => 'required|email|unique:clients',
             ]);
 
             if ($validate->fails()) {
+                // La validación ha fallado
                 $data = array(
                     'status' => 'error',
                     'code' => 404,
-                    'message' => 'El cliente no se a guardado',
+                    'message' => 'El client no se ha guardado',
                     'data' => $validate->errors()
                 );
+
             } else {
 
+    
                 //validadcion si es correcta
+                $params_array['id'] = Uuid::generate()->string;
                 $params_array['created_at'] = new \DateTime();
                 $params_array['updated_at'] = new \DateTime();
 
-                DB::insert('exec pa_addClient ?,?,?,?,?,?,?', [
+                DB::insert('exec pa_addClient ?,?,?,?,?,?,?,?', [
+                    $params_array['id'],
                     $params_array['identificationCard'],
                     $params_array['name'],
                     $params_array['surname'],
@@ -114,7 +120,7 @@ class ClientController extends Controller
         if (!empty($params_array)) {
             $collaborator = $this->getIdentity($request);
 
-            $validate = \Validator::make($params_array, [
+            $validate = Validator::make($params_array, [
                 'identificationCard' => 'required',
                 'name' => 'required',
                 'surname' => 'required',
