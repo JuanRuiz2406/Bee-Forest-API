@@ -14,7 +14,7 @@ class ClientController extends Controller
 {
     public function __construct()
     {
-        //$this->middleware('api.auth', ['except' => ['index', 'show']]);
+        $this->middleware('api.auth');
     }
 
     public function store(Request $request)
@@ -91,10 +91,11 @@ class ClientController extends Controller
         ]);
     }
 
-    public function show($Id)
+    public function show($id)
     {
-        $client = DB::select('exec pa_selectClients', $Id);
-        if (is_object($direction)) {
+        $client = DB::select('exec pa_selectClient ?', [$id]);
+       
+        if (count($client) > 0) {
             $data = [
                 'code' => 200,
                 'status' => 'Cliente encontrado correctamente',
@@ -111,7 +112,7 @@ class ClientController extends Controller
         return response()->json($data, $data['code']);
     }
 
-    public function update(Request $request)
+    public function update($id, Request $request)
     {
         $json = $request->input('json', null);
         $params = json_decode($json);
@@ -125,7 +126,7 @@ class ClientController extends Controller
                 'name' => 'required',
                 'surname' => 'required',
                 'telephone' => 'required',
-                'email' => 'required'
+                'email' => 'required|email',
             ]);
 
             if ($validate->fails()) {
@@ -136,18 +137,33 @@ class ClientController extends Controller
                     'data' => $validate->errors()
                 ];
             } else {
-                $id = $params_array['id'];
+
+                $unique = DB::select('exec pa_selectIdentificationCardClient ?', [$params->identificationCard]);
+
+                if ((count($unique) > 0) && ($params->identificationCard != $unique[0]->username)) {
+                    $data = array(
+                        'code' => 404,
+                        'status' => 'error',
+                        'data' => 'El cliente ya existe'
+                    );
+                return response()->json($data, $data['code']);
+                }
+
                 unset($params_array['id']);
                 unset($params_array['created_at']);
+
+                $params_array['id'] = $id;
                 $params_array['updated_at'] = new \DateTime();
 
-                DB::update('exec pa_updateClient ?,?,?,?,?,?', [
+                DB::update('exec pa_updateClient ?,?,?,?,?,?,?', [
+                    $params_array['id'],
                     $params_array['identificationCard'],
                     $params_array['name'],
                     $params_array['surname'],
                     $params_array['telephone'],
                     $params_array['email'],
-                    $params_array['updated_at']
+                    $params_array['updated_at'],
+
                 ]);
 
                 $data = [
@@ -197,9 +213,9 @@ class ClientController extends Controller
 
     private function getIdentity($request)
     {
-        $jwtAuth = new JwtAuth();
+        $jwtAuth = new \JwtAuth();
         $token = $request->header('Authorization', null);
-        $collaborator = $jwtAuth->checkToken($token, true);
+        $client = $jwtAuth->checkToken($token, true);
 
         return $client;
     }

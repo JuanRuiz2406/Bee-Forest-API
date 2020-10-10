@@ -144,7 +144,7 @@ class CollaboratorController extends Controller{
                 $data = array(
                     'code' => 404,
                     'status' => 'error',
-                    'data' => 'El usuario ya existe'
+                    'data' => 'El colaborador ya existe'
                 );
             return response()->json($data, $data['code']);
             }
@@ -236,7 +236,7 @@ class CollaboratorController extends Controller{
                 $data = [
                     'code' => 404,
                     'status' => 'error',
-                    'data' => 'Usuario admin no se puede eliminar'
+                    'data' => 'colaborador admin no se puede eliminar'
                 ];
             }
 
