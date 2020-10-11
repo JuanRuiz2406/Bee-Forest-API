@@ -1027,13 +1027,9 @@ CREATE PROCEDURE pa_addClient
 	@created_at DATETIME,
 	@updated_at DATETIME
 AS 
-BEGIN
-
-IF NOT EXISTS(SELECT identificationCard, email FROM clients WHERE @identificationCard = @identificationCard OR Email = @Email)	
+BEGIN	
 	INSERT INTO clients (id, identificationCard, name, surname, telephone, email, created_at, updated_at)
 	VALUES (@id, @identificationCard, @name, @surname, @telephone, @email, @created_at, @updated_at)
-ELSE
-	SELECT 'Tu cedula o correo ya se encuentran registrados' AS status;
 END
 
 GO
@@ -1109,9 +1105,10 @@ GO
 
 -- READ
 CREATE PROCEDURE pa_readDirections
+	@clientId UNIQUEIDENTIFIER
 AS
 BEGIN
-	SELECT * FROM directions
+	SELECT * FROM directions WHERE clientId = @clientId
 END
 
 GO

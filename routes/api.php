@@ -34,4 +34,7 @@ Route::get('collaborator/detail/{id}', [CollaboratorController::class, 'detail']
 Route::resource('product', ProductController::class); //CRUD
 Route::resource('client', ClientController::class); //CRUD
 Route::resource('material', MaterialController::class);
+
+//Rutas de Direcicones
 Route::resource('direction', DirectionController::class);
+Route::get('direction/get-direction-client/{id}', [DirectionController::class, 'indexByClient']);
