@@ -10,11 +10,8 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB; // Con esto podemos hacer consultas por sql
 use Uuid; //Generamos ID unico para cada registro
 
-class ClientController extends Controller
-{
-    public function __construct(){
-        $this->middleware('api.auth');
-    }
+class ClientController extends Controller {
+    public function __construct(){ $this->middleware('api.auth'); }
 
     public function store(Request $request){
 

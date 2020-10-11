@@ -496,6 +496,16 @@ END
 
 GO
 
+-- SELECT By Id
+CREATE PROCEDURE pa_selectProviderById
+		@id UNIQUEIDENTIFIER
+AS
+BEGIN
+	SELECT * FROM providers WHERE id = @id
+END
+
+GO
+
 -- UPDATE
 CREATE PROCEDURE pa_updateProvider  
 	@id UNIQUEIDENTIFIER, 
@@ -526,6 +536,7 @@ AS
 BEGIN
 	DELETE FROM providers WHERE id = @id
 END
+
 GO
 
 
@@ -534,19 +545,17 @@ GO
 
 -- INSERT
 CREATE PROCEDURE pa_addMaterial
-	@id BIGINT,
 	@providerId UNIQUEIDENTIFIER,
 	@name NVARCHAR(255),
 	@price FLOAT,
 	@amount INT,
 	@description NVARCHAR(255),
-	@image NVARCHAR(255),
 	@created_at DATETIME,
 	@updated_at DATETIME
 AS 
 BEGIN
-	INSERT INTO materials (id,providerId, name, price, amount, description, image, created_at, updated_at)
-	VALUES (@id, @providerId, @name, @price, @amount, @description, @image, @created_at, @updated_at)
+	INSERT INTO materials (providerId, name, price, amount, description, image, created_at, updated_at)
+	VALUES (@providerId, @name, @price, @amount, @description,'No image', @created_at, @updated_at)
 END
 
 GO
@@ -568,21 +577,30 @@ BEGIN
 	SELECT * FROM materials WHERE id = @id
 END
 
+GO 
+
+-- SELECT
+CREATE PROCEDURE pa_selectMaterialByName
+	@name NVARCHAR(255)
+AS
+BEGIN
+	SELECT * FROM materials WHERE name = @name
+END
+
 GO
 
 -- UPDATE
 CREATE PROCEDURE pa_updateMaterial  
-	@id BIGINT, 
+	@id BIGINT,
+	@providerId UNIQUEIDENTIFIER, 
 	@name NVARCHAR(255),
 	@price FLOAT,
 	@amount INT,
 	@description NVARCHAR(255),
-	@image NVARCHAR(255),
 	@updated_at DATETIME
 AS
 BEGIN
-	UPDATE materials SET name = @name,price = @price,amount = @amount,description = @description,
-						 image = @image,updated_at = @updated_at
+	UPDATE materials SET  providerId = @providerId, name = @name,price = @price,amount = @amount,description = @description, updated_at = @updated_at
 			WHERE id = @id;
 END
 

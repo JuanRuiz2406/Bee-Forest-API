@@ -19,8 +19,8 @@ class CreateMaterialsTable extends Migration
             $table->string('name')->unique();
             $table->double('price');
             $table->integer('amount');
-            $table->string('description');
-            $table->string('image');
+            $table->string('description')->nullable();;
+            $table->string('image')->nullable();;
             $table->timestamps();
 
             $table->foreign('providerId')->references('id')->on('providers');
