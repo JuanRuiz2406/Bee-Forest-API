@@ -29,7 +29,7 @@ class CategoryController extends Controller
             $data = [
                 'code' => 200,
                 'status' => 'success',
-                'category' => $category
+                'data' => $category
             ];
         } else {
             $data = [
@@ -75,6 +75,7 @@ class CategoryController extends Controller
                 $data = [
                     'code' => 200,
                     'status' => 'success',
+                    'message' => 'Categoria guardada',
                     'data' => $params_array
                 ];
             }
@@ -109,7 +110,7 @@ class CategoryController extends Controller
                 $data = array(
                     'code' => 404,
                     'status' => 'error',
-                    'data' => 'El el nombre de la categoria ya existe'
+                    'message' => 'El el nombre de la categoria ya existe'
                 );
 
                 return response()->json($data, $data['code']);
@@ -163,7 +164,7 @@ class CategoryController extends Controller
                 $data = [
                     'code' => 400,
                     'status' => 'error',
-                    'data' => 'No se elimino correctamente'
+                    'message' => 'No se elimino correctamente'
                 ];
             }
         } else {
@@ -171,7 +172,7 @@ class CategoryController extends Controller
             $data = [
                 'code' => 400,
                 'status' => 'error',
-                'data' => 'No se encontro la categoria'
+                'message' => 'No se encontro la categoria'
             ];
 
         }

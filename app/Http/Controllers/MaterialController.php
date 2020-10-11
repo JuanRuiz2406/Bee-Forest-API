@@ -53,6 +53,7 @@ class MaterialController extends Controller {
                 $data = [
                     'code'      => 200,
                     'status'    => 'success',
+                    'message'   => 'El material se a guardado correctamente.',
                     'data'      => $params_array
                 ];
 
@@ -62,7 +63,7 @@ class MaterialController extends Controller {
             $data = [
                 'code'      => 400,
                 'status'    => 'error',
-                'data'      => 'Envia los datos correctamente'
+                'message'      => 'Envia los datos correctamente'
             ];
         }
 
@@ -76,6 +77,7 @@ class MaterialController extends Controller {
         return response()->json([
             'code' => 200,
             'status' => 'success',
+            'message'   => 'Lista de materiales',
             'data' => $materials
         ]);
     }
@@ -87,14 +89,15 @@ class MaterialController extends Controller {
         if (count($material) > 0) {
             $data = [
                 'code' => 200,
-                'status' => 'Material encontrada correctamente',
+                'status' => 'success',
+                'message' => 'Material encontrada correctamente',
                 'data' => $material
             ];
         } else {
             $data = [
                 'code' => 400,
                 'status' => 'error',
-                'data' => 'Provedor no cuenta con materiales'
+                'message' => 'Provedor no cuenta con materiales'
             ];
         }
 
@@ -133,7 +136,7 @@ class MaterialController extends Controller {
                     $data = array(
                         'code' => 404,
                         'status' => 'error',
-                        'data' => 'El el nombre del material ya existe'
+                        'message' => 'El el nombre del material ya existe'
                     );
                     return response()->json($data, $data['code']);
                 }
@@ -154,6 +157,7 @@ class MaterialController extends Controller {
                 $data = [
                     'code' => 200,
                     'status' => 'success',
+                    'message' => 'Materiales actualizados',
                     'data' => $params_array
                 ];
             }
@@ -161,7 +165,7 @@ class MaterialController extends Controller {
             $data = [
                 'code' => 400,
                 'status' => 'error',
-                'data' => 'Envia los datos correctamente'
+                'message' => 'Envia los datos correctamente'
             ];
         }
 
@@ -187,7 +191,7 @@ class MaterialController extends Controller {
                 $data = [
                     'code' => 400,
                     'status' => 'error',
-                    'data' => 'No se elimino correctamente'
+                    'message' => 'No se elimino correctamente'
                 ];
             }
         } else {
@@ -195,7 +199,7 @@ class MaterialController extends Controller {
             $data = [
                 'code' => 400,
                 'status' => 'error',
-                'data' => 'No se encontro el material'
+                'message' => 'No se encontro el material'
             ];
 
         }

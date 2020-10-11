@@ -657,6 +657,16 @@ END
 
 GO
 
+-- SELECT PRODUCT BY NAME
+CREATE PROCEDURE pa_selectProductByName
+	@name NVARCHAR(255)
+AS
+BEGIN
+	SELECT * FROM products WHERE name = @name
+END
+
+GO
+
 -- UPDATE
 CREATE PROCEDURE pa_updateProduct
 	@id BIGINT,
@@ -665,12 +675,11 @@ CREATE PROCEDURE pa_updateProduct
 	@price FLOAT,
 	@amount INT,
 	@description NVARCHAR(255),
-	@image NVARCHAR(255),
 	@updated_at DATETIME
 AS
 BEGIN
 	UPDATE products SET name = @name, categoryId = @categoryId, price = @price,
-								amount = @amount, description = @description, image = @image,updated_at = @updated_at
+								amount = @amount, description = @description, updated_at = @updated_at
 			WHERE id = @id;
 END
 
@@ -683,6 +692,7 @@ AS
 BEGIN
 	DELETE FROM products WHERE id = @id
 END
+
 GO
 
 

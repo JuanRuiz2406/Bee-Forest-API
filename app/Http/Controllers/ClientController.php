@@ -7,8 +7,8 @@ use Illuminate\Http\Response;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\DB; // Con esto podemos hacer consultas por sql
-use Uuid; //Generamos ID unico para cada registro
+use Illuminate\Support\Facades\DB;
+use Uuid; 
 
 class ClientController extends Controller {
     public function __construct(){ $this->middleware('api.auth'); }
@@ -34,7 +34,7 @@ class ClientController extends Controller {
                 $data = array(
                     'status' => 'error',
                     'code' => 404,
-                    'message' => 'El client no se ha guardado',
+                    'message' => 'El cliente no se ha guardado',
                     'data' => $validate->errors()
                 );
 
@@ -58,6 +58,7 @@ class ClientController extends Controller {
                 $data = [
                     'code' => 200,
                     'status' => 'success',
+                    'message' => 'Cliente registrado.',
                     'data' => $params_array
                 ];
             }
@@ -65,7 +66,7 @@ class ClientController extends Controller {
             $data = [
                 'code' => 400,
                 'status' => 'error',
-                'data' => 'Envia los datos correctamente'
+                'message' => 'Envia los datos correctamente'
             ];
         }
 
@@ -78,6 +79,7 @@ class ClientController extends Controller {
         return response()->json([
             'code' => 200,
             'status' => 'success',
+            'message' =>  'Cliente encontrado',
             'data' => $clients
         ]);
     }
@@ -88,14 +90,15 @@ class ClientController extends Controller {
         if (count($client) > 0) {
             $data = [
                 'code' => 200,
-                'status' => 'Cliente encontrado correctamente',
+                'status' => 'success',
+                'message' =>  'Cliente encontrado correctamente',
                 'data' => $client
             ];
         } else {
             $data = [
                 'code' => 400,
                 'status' => 'error',
-                'data' => 'Cliente no encontrado'
+                'message' => 'Cliente no encontrado'
             ];
         }
 
@@ -134,7 +137,7 @@ class ClientController extends Controller {
                     $data = array(
                         'code' => 404,
                         'status' => 'error',
-                        'data' => 'El cliente ya existe'
+                        'message' => 'El cliente ya existe'
                     );
                     return response()->json($data, $data['code']);
                 }
@@ -159,6 +162,7 @@ class ClientController extends Controller {
                 $data = [
                     'code' => 200,
                     'status' => 'success',
+                    'message' => 'Cliente registrado',
                     'data' => $params_array
                 ];
             }
@@ -166,7 +170,7 @@ class ClientController extends Controller {
             $data = [
                 'code' => 400,
                 'status' => 'error',
-                'data' => 'Envia los datos correctamente'
+                'message' => 'Envia los datos correctamente'
             ];
         }
 
@@ -186,20 +190,20 @@ class ClientController extends Controller {
                 $data = [
                     'code' => 200,
                     'status' => 'success',
-                    'data' => 'Se elimino correctamente'
+                    'message' => 'Se elimino correctamente'
                 ];
             } else {
                 $data = [
                     'code' => 400,
                     'status' => 'error',
-                    'data' => 'No se elimino correctamente'
+                    'message' => 'No se elimino correctamente'
                 ];
             }
         } else {
             $data = [
                 'code' => 400,
                 'status' => 'error',
-                'data' => 'No se encontro el cliente'
+                'message' => 'No se encontro el cliente'
             ];
         }
 

@@ -55,6 +55,7 @@ class DirectionController extends Controller {
                 $data = [
                     'code'   => 200,
                     'status' => 'success',
+                    'message' => 'La direccion se a guardado correctamente',
                     'data'   => $params_array
                 ];
             }
@@ -64,7 +65,7 @@ class DirectionController extends Controller {
             $data = [
                 'code'   => 400,
                 'status' => 'error',
-                'data'   => 'Envia los datos correctamente'
+                'message'   => 'Envia los datos correctamente'
             ];
         }
 
@@ -72,6 +73,7 @@ class DirectionController extends Controller {
     }
 
     public function indexByClient( $id ) {
+        
         $directions = DB::select('exec pa_readDirections ?', [$id]);
 
         return response()->json([
@@ -88,14 +90,15 @@ class DirectionController extends Controller {
         if (count($direction) > 0) {
             $data = [
                 'code'   => 200,
-                'status' => 'Direcion encontrada correctamente',
+                'status' => 'success',
+                'message' => 'Direcion encontrada correctamente',
                 'data'   => $direction
             ];
         } else {
             $data = [
                 'code' => 400,
                 'status' => 'error',
-                'data' => 'Cliente no cuenta con direciones'
+                'message' => 'Cliente no cuenta con direcion'
             ];
         }
 
@@ -153,7 +156,7 @@ class DirectionController extends Controller {
             $data = [
                 'code'   => 400,
                 'status' => 'error',
-                'data'   => 'Envia los datos correctamente'
+                'message'   => 'Envia los datos correctamente'
             ];
         }
 
@@ -172,20 +175,20 @@ class DirectionController extends Controller {
                     $data = [
                         'code' => 200,
                         'status' => 'success',
-                        'data' => 'Se elimino correctamente'
+                        'message' => 'Se elimino correctamente'
                     ];
                 } else {
                     $data = [
                         'code' => 400,
                         'status' => 'error',
-                        'data' => 'No se elimino correctamente'
+                        'message' => 'No se elimino correctamente'
                     ];
                 }
         } else {
             $data = [
                 'code' => 400,
                 'status' => 'error',
-                'data' => 'No se encontro la direccion'
+                'message' => 'No se encontro la direccion'
             ];
         }
 

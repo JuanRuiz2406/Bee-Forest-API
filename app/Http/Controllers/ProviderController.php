@@ -97,7 +97,7 @@ class ProviderController extends Controller {
             $data = [
                 'code' => 400,
                 'status' => 'error',
-                'data' => 'Envia los datos correctamente'
+                'message' => 'Envia los datos correctamente'
             ];
         }
 
@@ -119,13 +119,13 @@ class ProviderController extends Controller {
             $data = [
                 'code' => 200,
                 'status' => 'Provider encontrado correctamente',
-                'data' => $provider
+                'message' => $provider
             ];
         } else {
             $data = [
                 'code' => 400,
                 'status' => 'error',
-                'data' => 'Cliente no encontrado'
+                'message' => 'Cliente no encontrado'
             ];
         }
 
@@ -175,7 +175,7 @@ class ProviderController extends Controller {
                     $data = array(
                         'code' => 404,
                         'status' => 'error',
-                        'data' => 'El cliente ya existe'
+                        'message' => 'El cliente ya existe'
                     );
                     return response()->json($data, $data['code']);
                 }
@@ -210,7 +210,7 @@ class ProviderController extends Controller {
             $data = [
                 'code'      => 400,
                 'status'    => 'error',
-                'data'      => 'Envia los datos correctamente'
+                'message'      => 'Envia los datos correctamente'
             ];
         }
 
@@ -235,20 +235,20 @@ class ProviderController extends Controller {
                 $data = [
                     'code' => 200,
                     'status' => 'success',
-                    'data' => 'Se elimino correctamente'
+                    'message' => 'Se elimino correctamente'
                 ];
             } else {
                 $data = [
                     'code' => 400,
                     'status' => 'error',
-                    'data' => 'No se elimino correctamente'
+                    'message' => 'No se elimino correctamente'
                 ];
             }
         } else {
             $data = [
                 'code' => 400,
                 'status' => 'error',
-                'data' => 'No se encontro el proveedor'
+                'message' => 'No se encontro el proveedor'
             ];
         }
 
