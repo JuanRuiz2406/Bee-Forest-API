@@ -138,16 +138,18 @@ class ClientController extends Controller
                 ];
             } else {
 
-                $unique = DB::select('exec pa_selectIdentificationCardClient ?', [$params->identificationCard]);
+                $unique = DB::select('exec pa_selectIdentificationCardClient ?, ?', [$params->identificationCard, $params->email]);
 
-                if ((count($unique) > 0) && ($params->identificationCard != $unique[0]->username)) {
+                if ((count($unique) > 0) && (strtoupper($id) != $unique[0]->id)) {
+ 
                     $data = array(
                         'code' => 404,
                         'status' => 'error',
                         'data' => 'El cliente ya existe'
                     );
-                return response()->json($data, $data['code']);
+                    return response()->json($data, $data['code']);
                 }
+            
 
                 unset($params_array['id']);
                 unset($params_array['created_at']);
@@ -183,11 +185,16 @@ class ClientController extends Controller
         return response()->json($data, $data['code']);
     }
 
-    public function destroy($idCard)
+    public function destroy($id)
     {
         if (isset($id)) {
-            $delete = DB::delete('exec pa_deleteClients ?', $idCard);
-            if ($delete) {
+
+            $client = DB::select('exec pa_selectClient ?', [$id]);
+
+            if (count($client) > 0) {
+
+                DB::delete('exec pa_deleteClient ?', [$id]);
+
                 $data = [
                     'code' => 200,
                     'status' => 'success',
