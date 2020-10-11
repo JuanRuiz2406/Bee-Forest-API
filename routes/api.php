@@ -8,6 +8,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\MaterialController;
 use App\Http\Controllers\DirectionController;
+use App\Http\Controllers\ProviderController;
 use App\Http\Middleware\ApiAuthMiddleware;
 
 /*
@@ -33,6 +34,7 @@ Route::get('collaborator/detail/{id}', [CollaboratorController::class, 'detail']
 
 Route::resource('product', ProductController::class); //CRUD
 Route::resource('client', ClientController::class); //CRUD
+Route::resource('provider', ProviderController::class); //CRUD
 Route::resource('material', MaterialController::class);
 
 //Rutas de Direcicones

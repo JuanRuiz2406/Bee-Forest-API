@@ -488,10 +488,10 @@ GO
 
 -- SELECT
 CREATE PROCEDURE pa_selectProvider
-	@id UNIQUEIDENTIFIER
+	@email NVARCHAR(255)
 AS
 BEGIN
-	SELECT * FROM providers WHERE id = @id
+	SELECT * FROM providers WHERE email = @email
 END
 
 GO
@@ -1150,6 +1150,7 @@ AS
 BEGIN
 	DELETE FROM directions WHERE id = @id
 END
+
 GO
 
 
