@@ -691,15 +691,14 @@ GO
 
 -- INSERT
 CREATE PROCEDURE pa_addCategory  
-	@id BIGINT, 
 	@name NVARCHAR(255),
 	@description NVARCHAR(255),
 	@created_at DATETIME,
 	@updated_at DATETIME
 AS
 BEGIN
-	INSERT INTO categories(id, name, description, created_at, updated_at)
-	VALUES (@id, @name, @description, @created_at, @updated_at)
+	INSERT INTO categories(name, description, created_at, updated_at)
+	VALUES (@name, @description, @created_at, @updated_at)
 END
 
 GO
@@ -719,6 +718,16 @@ CREATE PROCEDURE pa_selectCategory
 AS
 BEGIN
 	SELECT * FROM categories WHERE id = @id
+END
+
+GO
+
+-- SELECT CATEGORY BY NAME
+CREATE PROCEDURE pa_selectCategoryByName
+	@name NVARCHAR(255)
+AS
+BEGIN
+	SELECT * FROM categories WHERE name = @name
 END
 
 GO
@@ -745,6 +754,7 @@ AS
 BEGIN
 	DELETE FROM categories WHERE id = @id
 END
+
 GO
 
 

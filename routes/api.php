@@ -36,6 +36,7 @@ Route::resource('product', ProductController::class); //CRUD
 Route::resource('client', ClientController::class); //CRUD
 Route::resource('provider', ProviderController::class); //CRUD
 Route::resource('material', MaterialController::class);
+Route::resource('category', CategoryController::class);
 
 //Rutas de Direcicones
 Route::resource('direction', DirectionController::class);
