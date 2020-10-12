@@ -64,7 +64,7 @@ CREATE TABLE clients(
 	email NVARCHAR(255) NOT NULL,
 	created_at DATETIME NULL,
 	updated_at DATETIME NULL,
-	
+
 	CONSTRAINT clients_pk
 	PRIMARY KEY (id)
 )
@@ -82,7 +82,7 @@ CREATE TABLE collaborators(
 	[role] NVARCHAR(255) NOT NULL,
 	created_at DATETIME NULL,
 	updated_at DATETIME NULL,
-	
+
 	CONSTRAINT collaborators_pk
 	PRIMARY KEY (id)
 )
@@ -102,7 +102,7 @@ CREATE TABLE directions(
 	direction NVARCHAR(255) NOT NULL,
 	created_at DATETIME NULL,
 	updated_at DATETIME NULL,
-	
+
 	CONSTRAINT directions_pk
 	PRIMARY KEY (id),
 
@@ -125,7 +125,7 @@ CREATE TABLE products(
 	[image] NVARCHAR(255) NOT NULL,
 	created_at DATETIME NULL,
 	updated_at DATETIME NULL,
-	
+
 	CONSTRAINT products_pk
 	PRIMARY KEY (id),
 
@@ -145,7 +145,7 @@ CREATE TABLE shippings(
 	[description] NVARCHAR(255) NOT NULL,
 	created_at DATETIME NULL,
 	updated_at DATETIME NULL,
-	
+
 	CONSTRAINT shippings_pk
 	PRIMARY KEY (id)
 )
@@ -166,7 +166,7 @@ CREATE TABLE orders(
 	[status] NVARCHAR(255) NOT NULL,
 	created_at DATETIME NULL,
 	updated_at DATETIME NULL,
-	
+
 	CONSTRAINT orders_pk
 	PRIMARY KEY (id),
 
@@ -194,7 +194,7 @@ CREATE TABLE dispatch_tickets(
 	discount INT NOT NULL,
 	created_at DATETIME NULL,
 	updated_at DATETIME NULL,
-	
+
 	CONSTRAINT dispatch_tickets_pk
 	PRIMARY KEY (id),
 
@@ -220,7 +220,7 @@ CREATE TABLE providers(
 	finalTime TIME(7) NOT NULL,
 	created_at DATETIME NULL,
 	updated_at DATETIME NULL,
-	
+
 	CONSTRAINT providers_pk
 	PRIMARY KEY (id)
 )
@@ -240,7 +240,7 @@ CREATE TABLE materials(
 	[image] NVARCHAR(255) NOT NULL,
 	created_at DATETIME NULL,
 	updated_at DATETIME NULL,
-	
+
 	CONSTRAINT materials_pk
 	PRIMARY KEY (id),
 
@@ -260,7 +260,7 @@ CREATE TABLE product_material(
 	amount INT NOT NULL,
 	created_at DATETIME NULL,
 	updated_at DATETIME NULL,
-	
+
 	CONSTRAINT product_material_pk
 	PRIMARY KEY (id),
 
@@ -283,7 +283,7 @@ CREATE TABLE product_order(
 	amount INT NOT NULL,
 	created_at DATETIME NULL,
 	updated_at DATETIME NULL,
-	
+
 	CONSTRAINT product_order_pk
 	PRIMARY KEY (id),
 
@@ -305,7 +305,7 @@ CREATE TABLE refunds(
 	orderId BIGINT NOT NULL,
 	created_at DATETIME NULL,
 	updated_at DATETIME NULL,
-	
+
 	CONSTRAINT refunds_pk
 	PRIMARY KEY (id),
 
@@ -325,7 +325,7 @@ CREATE TABLE product_refund(
 	amount INT NOT NULL,
 	created_at DATETIME NULL,
 	updated_at DATETIME NULL,
-	
+
 	CONSTRAINT product_refund_pk
 	PRIMARY KEY (id),
 
@@ -356,7 +356,7 @@ INSERT INTO collaborators VALUES
 PRINT 'Creando vista de productos y categorias'
 GO
 
-CREATE VIEW v_listProductsCategories 
+CREATE VIEW v_listProductsCategories
 AS
 (
 	SELECT *, (SELECT name
@@ -383,7 +383,7 @@ GO
 PRINT 'Creando vista de devoluciones realizadas, con su cliente y productos asociados'
 GO
 
-CREATE VIEW v_listRefundsProductsClients 
+CREATE VIEW v_listRefundsProductsClients
 AS
 (
 	SELECT refundDate,
@@ -426,7 +426,7 @@ GO
 CREATE VIEW v_listLowMaterials
 AS
 (
-	SELECT * 
+	SELECT *
 	FROM materials
 	WHERE amount < 10
 )
@@ -439,7 +439,7 @@ GO
 CREATE VIEW v_listLowProducts
 AS
 (
-	SELECT * 
+	SELECT *
 	FROM products
 	WHERE amount < 10
 )
@@ -455,7 +455,7 @@ GO
 
 -- INSERT
 CREATE PROCEDURE pa_addProvider
-	@id UNIQUEIDENTIFIER, 
+	@id UNIQUEIDENTIFIER,
 	@name NVARCHAR(255),
 	@surname NVARCHAR(255),
 	@telephone NVARCHAR(255),
@@ -507,8 +507,8 @@ END
 GO
 
 -- UPDATE
-CREATE PROCEDURE pa_updateProvider  
-	@id UNIQUEIDENTIFIER, 
+CREATE PROCEDURE pa_updateProvider
+	@id UNIQUEIDENTIFIER,
 	@name NVARCHAR(255),
 	@surname NVARCHAR(255),
 	@telephone NVARCHAR(255),
@@ -552,7 +552,7 @@ CREATE PROCEDURE pa_addMaterial
 	@description NVARCHAR(255),
 	@created_at DATETIME,
 	@updated_at DATETIME
-AS 
+AS
 BEGIN
 	INSERT INTO materials (providerId, name, price, amount, description, image, created_at, updated_at)
 	VALUES (@providerId, @name, @price, @amount, @description,'No image', @created_at, @updated_at)
@@ -577,7 +577,7 @@ BEGIN
 	SELECT * FROM materials WHERE id = @id
 END
 
-GO 
+GO
 
 -- SELECT
 CREATE PROCEDURE pa_selectMaterialByName
@@ -590,9 +590,9 @@ END
 GO
 
 -- UPDATE
-CREATE PROCEDURE pa_updateMaterial  
+CREATE PROCEDURE pa_updateMaterial
 	@id BIGINT,
-	@providerId UNIQUEIDENTIFIER, 
+	@providerId UNIQUEIDENTIFIER,
 	@name NVARCHAR(255),
 	@price FLOAT,
 	@amount INT,
@@ -630,7 +630,7 @@ CREATE PROCEDURE pa_addProduct
 	@image NVARCHAR(255),
 	@created_at DATETIME,
 	@updated_at DATETIME
-AS 
+AS
 BEGIN
 	INSERT INTO products (categoryId, name, price, amount, description, image, created_at, updated_at)
 	VALUES (@categoryId, @name, @price, @amount, @description, @image, @created_at, @updated_at)
@@ -700,7 +700,7 @@ PRINT 'Creando procedimientos almacenados CRUD para la tabla Categories'
 GO
 
 -- INSERT
-CREATE PROCEDURE pa_addCategory  
+CREATE PROCEDURE pa_addCategory
 	@name NVARCHAR(255),
 	@description NVARCHAR(255),
 	@created_at DATETIME,
@@ -743,8 +743,8 @@ END
 GO
 
 -- UPDATE
-CREATE PROCEDURE pa_updateCategory  
-	@id BIGINT, 
+CREATE PROCEDURE pa_updateCategory
+	@id BIGINT,
 	@name NVARCHAR(255),
 	@description NVARCHAR(255),
 	@updated_at DATETIME
@@ -782,7 +782,7 @@ CREATE PROCEDURE pa_addOrder
 	@status NVARCHAR(255),
 	@created_at DATETIME,
 	@updated_at DATETIME
-AS 
+AS
 BEGIN
 	INSERT INTO orders (collaboratorId, clientId, ShippingId, creationDate, deliveryDate, totalPrice, status, created_at, updated_at)
 	VALUES (@collaboratorId, @clientId, @ShippingId, @creationDate, @deliveryDate, @totalPrice, @status, @created_at, @updated_at)
@@ -810,8 +810,8 @@ END
 GO
 
 -- UPDATE
-CREATE PROCEDURE pa_updateOrder 
-	@id BIGINT, 
+CREATE PROCEDURE pa_updateOrder
+	@id BIGINT,
 	@collaboratorId UNIQUEIDENTIFIER,
 	@clientId UNIQUEIDENTIFIER,
 	@shippingId BIGINT,
@@ -847,7 +847,7 @@ CREATE PROCEDURE pa_addRefund
 	@orderId BIGINT,
 	@created_at DATETIME,
 	@updated_at DATETIME
-AS 
+AS
 BEGIN
 	INSERT INTO refunds (refundDate, orderId, created_at, updated_at)
 	VALUES (@refundDate, @orderId, @created_at, @updated_at)
@@ -911,7 +911,7 @@ CREATE PROCEDURE pa_addCollaborator
 	@role NVARCHAR(255),
 	@created_at DATETIME,
 	@updated_at DATETIME
-AS 
+AS
 BEGIN
 	INSERT INTO collaborators (id, username, password, email, role, created_at, updated_at)
 	VALUES (@id, @username, @password, @email, @role, @created_at, @updated_at)
@@ -998,7 +998,7 @@ CREATE PROCEDURE pa_addShipping
 	@description NVARCHAR(255),
 	@created_at DATETIME,
 	@updated_at DATETIME
-AS 
+AS
 BEGIN
 	INSERT INTO shippings (name, price, description, created_at, updated_at)
 	VALUES (@name, @price, @description, @created_at, @updated_at)
@@ -1021,6 +1021,16 @@ CREATE PROCEDURE pa_selectShipping
 AS
 BEGIN
 	SELECT * FROM shippings WHERE id = @id
+END
+
+GO
+
+--SELECT SHIPPING BY NAME
+CREATE PROCEDURE pa_selectShippingByName
+	@name NVARCHAR(255)
+AS
+BEGIN
+	SELECT * FROM shippings WHERE name = @name
 END
 
 GO
@@ -1064,8 +1074,8 @@ CREATE PROCEDURE pa_addClient
 	@email NVARCHAR(255),
 	@created_at DATETIME,
 	@updated_at DATETIME
-AS 
-BEGIN	
+AS
+BEGIN
 	INSERT INTO clients (id, identificationCard, name, surname, telephone, email, created_at, updated_at)
 	VALUES (@id, @identificationCard, @name, @surname, @telephone, @email, @created_at, @updated_at)
 END
@@ -1133,7 +1143,7 @@ CREATE PROCEDURE pa_addDirection
 	@direction NVARCHAR(255),
 	@created_at DATETIME,
 	@updated_at DATETIME
-AS 
+AS
 BEGIN
 	INSERT INTO directions (clientId, country, province, city, zipCode, direction, created_at, updated_at)
 	VALUES (@clientId, @country, @province, @city, @zipCode, @direction, @created_at, @updated_at)
@@ -1162,8 +1172,8 @@ END
 GO
 
 -- UPDATE
-CREATE PROCEDURE pa_updateDirection 
-	@id BIGINT, 
+CREATE PROCEDURE pa_updateDirection
+	@id BIGINT,
 	@clientId UNIQUEIDENTIFIER,
 	@country NVARCHAR(255),
 	@province NVARCHAR(255),
@@ -1204,7 +1214,7 @@ CREATE PROCEDURE pa_addDispathTicker
 	@discount INT,
 	@created_at DATETIME,
 	@updated_at DATETIME
-AS 
+AS
 BEGIN
 	INSERT INTO dispatch_tickets (orderId, totalPrice, dispatchDate, status, discount, created_at, updated_at)
 	VALUES (@orderId, @totalPrice, @dispatchDate, @status, @discount, @created_at, @updated_at)
