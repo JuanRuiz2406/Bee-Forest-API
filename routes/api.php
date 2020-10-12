@@ -9,7 +9,9 @@ use App\Http\Controllers\ClientController;
 use App\Http\Controllers\MaterialController;
 use App\Http\Controllers\DirectionController;
 use App\Http\Controllers\ProviderController;
+use App\Http\Controllers\ShippingController;
 use App\Http\Middleware\ApiAuthMiddleware;
+use App\Models\Shipping;
 
 /*
 |--------------------------------------------------------------------------
@@ -37,6 +39,7 @@ Route::resource('client', ClientController::class); //CRUD
 Route::resource('provider', ProviderController::class); //CRUD
 Route::resource('material', MaterialController::class);
 Route::resource('category', CategoryController::class);
+Route::resource('shipping', ShippingController::class);
 
 //Rutas de Direcicones
 Route::resource('direction', DirectionController::class);
