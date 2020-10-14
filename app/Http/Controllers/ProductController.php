@@ -40,8 +40,7 @@ class ProductController extends Controller
             $validate = \Validator::make($params_array, [
                 'categoryId' => 'required',
                 'name' => 'required|unique:products',
-                'price' => 'required',
-                'amount' => 'required',
+                'price' => 'required'
             ]);
 
             if ($validate->fails()) {
@@ -57,11 +56,10 @@ class ProductController extends Controller
                 $params_array['updated_at'] = new \DateTime();
 
                 //Guardar el Producto
-                DB::insert('exec pa_addProduct ?,?,?,?,?,?,?,?', [
+                DB::insert('exec pa_addProduct ?,?,?,?,?,?,?', [
                     $params_array['categoryId'],
                     $params_array['name'],
                     $params_array['price'],
-                    $params_array['amount'],
                     $params_array['description'],
                     $params_array['image'],
                     $params_array['created_at'],
@@ -69,7 +67,7 @@ class ProductController extends Controller
                 ]);
 
                 //Buscar el producto
-                $product = DB::select('exec pa_selectProductByName ?', [$params->name]); 
+                $product = DB::select('exec pa_selectProductByName ?', [$params->name]);
 
                 //Registrar los materiales en product_material (Tabla pivote)
                 if(count($product) > 0){ // si el producto se guardo
@@ -91,23 +89,23 @@ class ProductController extends Controller
                                 new \DateTime(),
                                 new \DateTime()
                             ]);
-                            
+
                             //Hacemos el update de la nueva contidad en meterilas
                             DB::insert('update materials set amount = ? where id = ?', [
                                 $material[0]->amount - ($product[0]->amount * $value['amount']),
                                 $value['id'],
                             ]);
                         }else{
-                            
+
                             //Si alguno de los materiales da en negativo la cantidad eliminamos el producto recien creado y retornamos una advertencia
-                            $delete = DB::delete('exec pa_deleteProduct ?', [ $product[0]->id ]); 
+                            $delete = DB::delete('exec pa_deleteProduct ?', [ $product[0]->id ]);
 
                             $data = [
                                 'code' => 400,
                                 'status' => 'error',
                                 'message' => 'La cantidad de materiales para crear el producto no es suficiente'
                             ];
-        
+
                             return response()->json($data, $data['code']);
 
                         }

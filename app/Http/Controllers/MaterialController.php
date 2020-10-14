@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
-use Uuid; 
+use Uuid;
 
 class MaterialController extends Controller {
 
@@ -23,8 +23,7 @@ class MaterialController extends Controller {
             $validate = \Validator::make($params_array, [
                 'providerId' => 'required',
                 'name'       => 'required|unique:materials',
-                'price'      => 'required',
-                'amount'     => 'required'
+                'price'      => 'required'
             ]);
 
             if ($validate->fails()) {
@@ -40,11 +39,10 @@ class MaterialController extends Controller {
                 $params_array['created_at'] = new \DateTime();
                 $params_array['updated_at'] = new \DateTime();
 
-                DB::insert('exec pa_addMaterial ?,?,?,?,?,?,?', [
+                DB::insert('exec pa_addMaterial ?,?,?,?,?,?', [
                     $params_array['providerId'],
                     $params_array['name'],
                     $params_array['price'],
-                    $params_array['amount'],
                     $params_array['description'],
                     $params_array['created_at'],
                     $params_array['updated_at']
@@ -71,7 +69,7 @@ class MaterialController extends Controller {
     }
 
     public function index(){
-       
+
         $materials = DB::select('exec pa_readMaterials');
 
         return response()->json([
@@ -111,7 +109,7 @@ class MaterialController extends Controller {
         $params_array = json_decode($json, true);
 
         if (!empty($params_array)) {
-           
+
             $validate = \Validator::make($params_array, [
                 'providerId' => 'required',
                 'name' => 'required',
@@ -132,7 +130,7 @@ class MaterialController extends Controller {
                 $unique = DB::select('exec pa_selectMaterialByName ?', [$params->name]);
 
                 if ((count($unique) > 0) && (strtoupper($id) != $unique[0]->id)) {
- 
+
                     $data = array(
                         'code' => 404,
                         'status' => 'error',

@@ -392,7 +392,9 @@ AS
 				WHERE products.id = product_refund.productId) AS 'productName',
 		   (SELECT name
 				FROM clients
-				WHERE clients.id = (SELECT clientId FROM orders WHERE orders.id = refunds.id)) AS 'clientName'
+				WHERE clients.id = (SELECT clientId
+                                    FROM orders
+                                    WHERE orders.id = refunds.id)) AS 'clientName'
 	FROM refunds
 	INNER JOIN product_refund ON product_refund.refundId = refunds.id
 )
@@ -548,14 +550,13 @@ CREATE PROCEDURE pa_addMaterial
 	@providerId UNIQUEIDENTIFIER,
 	@name NVARCHAR(255),
 	@price FLOAT,
-	@amount INT,
 	@description NVARCHAR(255),
 	@created_at DATETIME,
 	@updated_at DATETIME
 AS
 BEGIN
 	INSERT INTO materials (providerId, name, price, amount, description, image, created_at, updated_at)
-	VALUES (@providerId, @name, @price, @amount, @description,'No image', @created_at, @updated_at)
+	VALUES (@providerId, @name, @price, 0, @description,'No image', @created_at, @updated_at)
 END
 
 GO
@@ -596,12 +597,52 @@ CREATE PROCEDURE pa_updateMaterial
 	@name NVARCHAR(255),
 	@price FLOAT,
 	@amount INT,
-	@description NVARCHAR(255),
+    @description NVARCHAR(255),
 	@updated_at DATETIME
 AS
 BEGIN
-	UPDATE materials SET  providerId = @providerId, name = @name,price = @price,amount = @amount,description = @description, updated_at = @updated_at
+	UPDATE materials SET providerId = @providerId, name = @name,price = @price,amount = @amount,description = @description, updated_at = @updated_at
 			WHERE id = @id;
+END
+
+GO
+
+-- UPDATE MORE MATERIAL
+CREATE PROCEDURE pa_updateMoreAmountMaterial
+	@id BIGINT,
+	@amount INT,
+	@updated_at DATETIME
+AS
+BEGIN
+    IF(@amount > 0)
+    BEGIN
+	    UPDATE materials SET amount = (amount + @amount), updated_at = @updated_at
+			    WHERE id = @id;
+    END
+    ELSE
+    BEGIN
+        SELECT 'La cantidad a añadir no puede ser menor a 1' AS status
+    END
+END
+
+GO
+
+-- UPDATE LESS MATERIAL
+CREATE PROCEDURE pa_updateLessAmountMaterial
+	@id BIGINT,
+	@lessAmount INT,
+	@updated_at DATETIME
+AS
+BEGIN
+    IF(@lessAmount > 0)
+    BEGIN
+	    UPDATE materials SET amount = (amount - @lessAmount), updated_at = @updated_at
+			    WHERE id = @id;
+    END
+    ELSE
+    BEGIN
+        SELECT 'La cantidad a utilizar no puede ser menor a 1' AS status
+    END
 END
 
 GO
@@ -625,7 +666,6 @@ CREATE PROCEDURE pa_addProduct
 	@categoryId BIGINT,
 	@name NVARCHAR(255),
 	@price FLOAT,
-	@amount INT,
 	@description NVARCHAR(255),
 	@image NVARCHAR(255),
 	@created_at DATETIME,
@@ -633,7 +673,7 @@ CREATE PROCEDURE pa_addProduct
 AS
 BEGIN
 	INSERT INTO products (categoryId, name, price, amount, description, image, created_at, updated_at)
-	VALUES (@categoryId, @name, @price, @amount, @description, @image, @created_at, @updated_at)
+	VALUES (@categoryId, @name, @price, 0, @description, @image, @created_at, @updated_at)
 END
 
 GO
@@ -681,6 +721,46 @@ BEGIN
 	UPDATE products SET name = @name, categoryId = @categoryId, price = @price,
 								amount = @amount, description = @description, updated_at = @updated_at
 			WHERE id = @id;
+END
+
+GO
+
+-- UPDATE LESS PRODUCT
+CREATE PROCEDURE pa_updateLessAmountProduct
+	@id BIGINT,
+	@amount INT,
+	@updated_at DATETIME
+AS
+BEGIN
+    IF(@amount > 0)
+    BEGIN
+	    UPDATE products SET amount = (amount - @amount), updated_at = @updated_at
+			    WHERE id = @id;
+    END
+    ELSE
+    BEGIN
+        SELECT 'La cantidad a utilizar no puede ser menor a 1' AS status
+    END
+END
+
+GO
+
+-- UPDATE MORE PRODUCT
+CREATE PROCEDURE pa_updateMoreAmountProduct
+	@id BIGINT,
+	@amount INT,
+	@updated_at DATETIME
+AS
+BEGIN
+    IF(@amount > 0)
+    BEGIN
+	    UPDATE products SET amount = (amount + @amount), updated_at = @updated_at
+			    WHERE id = @id;
+    END
+    ELSE
+    BEGIN
+        SELECT 'La cantidad a añadir no puede ser menor a 1' AS status
+    END
 END
 
 GO
@@ -1076,8 +1156,13 @@ CREATE PROCEDURE pa_addClient
 	@updated_at DATETIME
 AS
 BEGIN
-	INSERT INTO clients (id, identificationCard, name, surname, telephone, email, created_at, updated_at)
-	VALUES (@id, @identificationCard, @name, @surname, @telephone, @email, @created_at, @updated_at)
+    IF NOT EXISTS(SELECT identificationCard, email
+                  FROM clients
+                  WHERE @identificationCard = @identificationCard OR email = @Email)	
+	    INSERT INTO clients (id, identificationCard, name, surname, telephone, email, created_at, updated_at)
+	    VALUES (@id, @identificationCard, @name, @surname, @telephone, @email, @created_at, @updated_at)
+    ELSE
+	    SELECT 'Tu cedula o correo ya se encuentran registrados' AS status;
 END
 
 GO
@@ -1347,6 +1432,9 @@ GO
 PRINT 'Creando Triggers'
 GO
 
+PRINT 'Creando Trigger de no borrado de productos con cantidad mayor que 0'
+GO
+
 -- No borrar productos con stock
 CREATE TRIGGER dis_productDelete
 ON products
@@ -1367,6 +1455,9 @@ END
 
 GO
 
+PRINT 'Creando Trigger de no borrado de materiales con cantidad mayor que 0'
+GO
+
 -- No borrar materiales con stock
 CREATE TRIGGER dis_materialDelete
 ON materials
@@ -1385,6 +1476,9 @@ BEGIN
 
 END
 
+GO
+
+PRINT 'Creando Trigger de no borrado de categorias con productos relacionados'
 GO
 
 -- No borrar categorias que tengan relaciones con productos
@@ -1409,6 +1503,9 @@ END
 
 GO
 
+PRINT 'Creando Trigger de no borrado de productos con ordenes relacionadas'
+GO
+
 -- No borrar productos que tengan relaciones con ventas
 CREATE TRIGGER dis_deleteProductRelation
 ON products
@@ -1429,6 +1526,9 @@ BEGIN
 
 END
 
+GO
+
+PRINT 'Creando Trigger de no borrado de materiales con productos relacionados'
 GO
 
 -- No borrar materiales que tengan relaciones con productos
@@ -1453,41 +1553,148 @@ END
 
 GO
 
+PRINT 'Creando Trigger de resta de materiales al añadir x cantidad de productos'
+GO
 
-
--- fallan / faltan:
-
--- REVISAR, COMO JALAR EL ID DE MATERIAL
 -- Restar materiales al insertar producto
-CREATE TRIGGER dis_productInsert
+CREATE TRIGGER dis_productAddAmount
 ON products
-AFTER INSERT
+AFTER UPDATE
 AS
 BEGIN
-	DECLARE @id BIGINT, @amount INT, @amountResta INT
+	DECLARE @productId BIGINT, @materialId BIGINT, @updated_at DATETIME, @amount INT, @fail int,
+            @materialName NVARCHAR(255), @materialAmount INT, @actualAmount INT, @lessAmount INT
+    SELECT @productId = id, @amount = amount, @updated_at = updated_at FROM inserted
 
-	SELECT @id = id, @amount = amount FROM inserted
+    BEGIN TRANSACTION;
 
-	SET @amountResta = ((SELECT amount
-						 FROM product_material
-						 WHERE productId = @id AND materialId = 0)
-						 * @amount)
+    DECLARE cProducts CURSOR FOR
+    -- Consulta materiales que se relacionan con el producto a aumentar
+    SELECT materialId, amount
+    FROM product_material
+    WHERE productId = @productId
 
-	UPDATE materials
-	SET amount = amount - @amountResta
+    -- Cursor
+	OPEN cProducts
+    FETCH cProducts INTO @materialId, @materialAmount
+    WHILE(@@FETCH_STATUS = 0)
+    BEGIN 
 
-	IF (@amountResta > @amount)
+        -- Monto Material y Monto a Restar
+        SET @actualAmount = (SELECT amount FROM materials WHERE id = @materialId)
+        SET @lessAmount = @amount * @materialAmount
+
+        -- Si lo que tengo es mayor a lo que se necesita para crear un producto,
+        -- ejecuto el P.A. para restar materiales
+        IF(@actualAmount >= @lessAmount)
+        BEGIN
+            EXEC pa_updateLessAmountMaterial @materialId, @lessAmount, @updated_at
+        END
+        -- Si en algún momento no es suficiente, saco el nombre del material,
+        -- y vamos al CANCEL
+        ELSE
+        BEGIN
+            SET @materialName = (SELECT name FROM materials WHERE id = @materialId)
+			SELECT @fail = 1;
+            GOTO CANCEL
+        END
+
+        FETCH cProducts INTO @materialId, @materialAmount
+    END
+
+    -- En caso de que todo sucediera correctamente, liberar memoria y COMMIT
+    CLOSE cProducts
+    DEALLOCATE cProducts
+    COMMIT TRANSACTION;
+	SELECT @fail = 0;
+
+    -- En caso de redirigir aquí, Mostramos material insuficiente y Rollback
+	-- fail es para que no entre en caso de éxito
+    CANCEL:
+	IF (@fail = 1)
 	BEGIN
-		RAISERROR('Error... No hay materiales suficientes para añadir este producto', 16, 1)
-		ROLLBACK TRANSACTION
+		SELECT 'No tenemos *' + @materialName + '* suficientes para crear el producto' AS status;
+		CLOSE cProducts
+		DEALLOCATE cProducts
+		ROLLBACK TRANSACTION;
 	END
-
 END
 
 GO
 
+PRINT 'Creando Trigger de resta de productos al realizar ordenes'
+GO
+
 -- Restar productos al realizar pedido
--- dis_shippingInsert
+CREATE TRIGGER dis_orderInsert
+ON orders
+FOR INSERT
+AS
+BEGIN
+	DECLARE @productId BIGINT, @orderId BIGINT, @updated_at DATETIME, @amount INT, @fail int,
+            @productName NVARCHAR(255), @productAmount INT, @actualAmount INT, @lessAmount INT
+    SELECT @orderId = id, @updated_at = updated_at FROM inserted
+
+    BEGIN TRANSACTION;
+
+    DECLARE cProducts CURSOR FOR
+    -- Consulta productos que se relacionan con la orden a realizar
+    SELECT productId, amount
+    FROM product_order
+    WHERE productId = @productId
+
+    -- Cursor
+	OPEN cOrder
+    FETCH cOrder INTO @productId, @productAmount
+    WHILE(@@FETCH_STATUS = 0)
+    BEGIN 
+
+        -- Monto Productos y Monto a Restar
+        SET @actualAmount = (SELECT amount FROM products WHERE id = @productId)
+        SET @lessAmount = @amount * @productAmount
+
+        -- Si lo que tengo es mayor a lo que se necesita para crear la order,
+        -- ejecuto el P.A. para restar productos
+        IF(@actualAmount >= @lessAmount)
+        BEGIN
+            EXEC pa_updateLessAmountProduct @productId, @lessAmount, @updated_at
+        END
+        -- Si en algún momento no es suficiente, saco el nombre del producto,
+        -- y vamos al CANCEL
+        ELSE
+        BEGIN
+            SET @productName = (SELECT name FROM products WHERE id = @productId)
+			SELECT @fail = 1;
+            GOTO CANCEL
+        END
+
+        FETCH cProducts INTO @productId, @productAmount
+    END
+
+    -- En caso de que todo sucediera correctamente, liberar memoria y COMMIT
+    CLOSE cProducts
+    DEALLOCATE cProducts
+    COMMIT TRANSACTION;
+	SELECT @fail = 0;
+
+    -- En caso de redirigir aquí, Mostramos material insuficiente y Rollback
+	-- fail es para que no entre en caso de éxito
+    CANCEL:
+	IF (@fail = 1)
+	BEGIN
+		SELECT 'No tenemos *' + @productName + '* suficientes para crear la orden' AS status;
+		CLOSE cProducts
+		DEALLOCATE cProducts
+		ROLLBACK TRANSACTION;
+	END
+END
+
+GO
+
+PRINT 'Creando Trigger de suma de productos al realizar devoluciones'
+GO
 
 -- Sumar productos al insertar devolucion
 -- dis_refundInsert
+
+
