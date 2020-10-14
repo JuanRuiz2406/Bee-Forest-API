@@ -1158,7 +1158,7 @@ AS
 BEGIN
     IF NOT EXISTS(SELECT identificationCard, email
                   FROM clients
-                  WHERE @identificationCard = @identificationCard OR email = @Email)	
+                  WHERE @identificationCard = @identificationCard OR email = @Email)
 	    INSERT INTO clients (id, identificationCard, name, surname, telephone, email, created_at, updated_at)
 	    VALUES (@id, @identificationCard, @name, @surname, @telephone, @email, @created_at, @updated_at)
     ELSE
@@ -1578,7 +1578,7 @@ BEGIN
 	OPEN cProducts
     FETCH cProducts INTO @materialId, @materialAmount
     WHILE(@@FETCH_STATUS = 0)
-    BEGIN 
+    BEGIN
 
         -- Monto Material y Monto a Restar
         SET @actualAmount = (SELECT amount FROM materials WHERE id = @materialId)
@@ -1647,7 +1647,7 @@ BEGIN
 	OPEN cOrder
     FETCH cOrder INTO @productId, @productAmount
     WHILE(@@FETCH_STATUS = 0)
-    BEGIN 
+    BEGIN
 
         -- Monto Productos y Monto a Restar
         SET @actualAmount = (SELECT amount FROM products WHERE id = @productId)
@@ -1697,4 +1697,8 @@ GO
 -- Sumar productos al insertar devolucion
 -- dis_refundInsert
 
+-- ESTE TRIGGER DEBER�A SER EN product_refund, EN CADA INSERCI�N QUE VALIDE SI EL AMOUNT ES V�LIDO
+-- CONSULTA: EMPEZANDO DESDE refund (ID) JOIN orders (ORDERID) JOIN product_order (SACAR AMOUNT Y PRODUCTID)
+-- SI AMOUNT(product_refund) ES <= A AMOUNT(product_refund) INSERTAR
+-- ELSE CANCEL
 
