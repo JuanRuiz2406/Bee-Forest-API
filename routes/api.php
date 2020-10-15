@@ -10,6 +10,7 @@ use App\Http\Controllers\MaterialController;
 use App\Http\Controllers\DirectionController;
 use App\Http\Controllers\ProviderController;
 use App\Http\Controllers\ShippingController;
+use App\Http\Controllers\OrderController;
 use App\Http\Middleware\ApiAuthMiddleware;
 use App\Models\Shipping;
 
@@ -40,6 +41,7 @@ Route::resource('provider', ProviderController::class); //CRUD
 Route::resource('material', MaterialController::class);
 Route::resource('category', CategoryController::class);
 Route::resource('shipping', ShippingController::class);
+Route::resource('order', OrderController::class);
 
 //Rutas de Direcicones
 Route::resource('direction', DirectionController::class);

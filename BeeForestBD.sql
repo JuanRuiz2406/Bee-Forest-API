@@ -1569,7 +1569,7 @@ BEGIN
     BEGIN TRANSACTION;
 
     DECLARE cProducts CURSOR FOR
-    -- Consulta materiales que se relacionan con el producto a aumentar
+    -- Consulta materiales que se relacionan con el producto a restar
     SELECT materialId, amount
     FROM product_material
     WHERE productId = @productId
