@@ -1637,7 +1637,7 @@ BEGIN
 
     BEGIN TRANSACTION;
 
-    DECLARE cProducts CURSOR FOR
+    DECLARE cOrder CURSOR FOR
     -- Consulta productos que se relacionan con la orden a realizar
     SELECT productId, amount
     FROM product_order
@@ -1668,12 +1668,12 @@ BEGIN
             GOTO CANCEL
         END
 
-        FETCH cProducts INTO @productId, @productAmount
+        FETCH cOrder INTO @productId, @productAmount
     END
 
     -- En caso de que todo sucediera correctamente, liberar memoria y COMMIT
-    CLOSE cProducts
-    DEALLOCATE cProducts
+    CLOSE cOrder
+    DEALLOCATE cOrder
     COMMIT TRANSACTION;
 	SELECT @fail = 0;
 
@@ -1683,8 +1683,8 @@ BEGIN
 	IF (@fail = 1)
 	BEGIN
 		SELECT 'No tenemos *' + @productName + '* suficientes para crear la orden' AS status;
-		CLOSE cProducts
-		DEALLOCATE cProducts
+		CLOSE cOrder
+		DEALLOCATE cOrder
 		ROLLBACK TRANSACTION;
 	END
 END
