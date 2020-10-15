@@ -66,6 +66,8 @@ class ProductController extends Controller
                     $params_array['updated_at']
                 ]);
 
+                /* Esto pa otro dia
+                
                 //Buscar el producto
                 $product = DB::select('exec pa_selectProductByName ?', [$params->name]);
 
@@ -113,7 +115,7 @@ class ProductController extends Controller
                     }
 
                 }
-
+                */
                 $data = [
                     'code' => 200,
                     'status' => 'success',

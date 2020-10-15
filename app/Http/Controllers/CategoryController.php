@@ -21,9 +21,9 @@ class CategoryController extends Controller
         ]);
     }
 
-    public function show($id)
+    public function show($name)
     {
-        $category = DB::select('select * from categories where id = ?', [$id]);
+        $category = DB::select('select * from categories where name = ?', [$name]);
 
         if (count($category) > 0) {
             $data = [
