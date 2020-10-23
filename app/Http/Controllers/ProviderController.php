@@ -41,7 +41,7 @@ class ProviderController extends Controller {
     //GET ONE
     public function show($id){
 
-        $provider = DB::select('exec pa_selectProvider ?', [$id]);
+        $provider = DB::select('exec pa_selectProviderById ?', [$id]);
 
         if (count($provider) > 0) {
             $data = [

@@ -450,10 +450,24 @@ CREATE PROCEDURE pa_addProvider
 	@updated_at DATETIME
 AS
 BEGIN
-	INSERT INTO providers (id,name,surname,telephone,direction,email,startDay,
-						   finalDay,StartTime,finalTime,created_at,updated_at)
-	VALUES (@id,@name,@surname,@telephone,@direction,@email,@startDay,
-			@finalDay,@StartTime,@finalTime,@created_at,@updated_at)
+    -- Validación nulos
+    IF (@id IS NULL OR @name IS NULL OR @surname IS NULL OR @telephone IS NULL OR @direction
+        IS NULL OR @email IS NULL OR @startDay IS NULL OR @finalDay IS NULL OR @StartTime
+        IS NULL OR @finalTime IS NULL OR @created_at IS NULL OR @updated_at IS NULL)
+        SELECT 'Error, hay dato(s) vacíos' AS status;
+    
+    ELSE
+        -- Validación ID o Email ya existentes
+        IF NOT EXISTS(SELECT id, identificationCard, email
+                      FROM clients
+                      WHERE id = @id OR email = @email)
+            -- Insertar
+	        INSERT INTO providers (id,name,surname,telephone,direction,email,startDay,
+						finalDay,StartTime,finalTime,created_at,updated_at)
+	        VALUES (@id,@name,@surname,@telephone,@direction,@email,@startDay,
+			        @finalDay,@StartTime,@finalTime,@created_at,@updated_at)
+        ELSE
+	        SELECT 'Tu cedula o correo electrónico ya se encuentran registrados' AS status;
 END
 
 GO
@@ -472,7 +486,14 @@ CREATE PROCEDURE pa_selectProviderByEmail
 	@email NVARCHAR(255)
 AS
 BEGIN
-	SELECT * FROM providers WHERE email = @email
+	-- Validación ID existe
+    IF NOT EXISTS(SELECT id
+                  FROM clients
+                  WHERE email = @email)
+            SELECT 'El Correo Electrónico del Proveedor no existe' AS status;
+        -- Actualizar
+        ELSE
+        	SELECT * FROM providers WHERE email = @email
 END
 
 GO
@@ -482,7 +503,14 @@ CREATE PROCEDURE pa_selectProviderById
 	@id UNIQUEIDENTIFIER
 AS
 BEGIN
-	SELECT * FROM providers WHERE id = @id
+	-- Validación ID existe
+    IF NOT EXISTS(SELECT id
+                  FROM clients
+                  WHERE id = @id)
+            SELECT 'El ID del Proveedor no existe' AS status;
+        -- Select
+        ELSE
+        	SELECT * FROM providers WHERE id = @id
 END
 
 GO
@@ -502,10 +530,24 @@ CREATE PROCEDURE pa_updateProvider
 	@updated_at DATETIME
 AS
 BEGIN
-	UPDATE providers SET name = @name,surname = @surname,telephone = @telephone,direction = @direction,
+    -- Validación nulos
+    IF (@id IS NULL OR @name IS NULL OR @surname IS NULL OR @telephone IS NULL OR @direction
+        IS NULL OR @email IS NULL OR @startDay IS NULL OR @finalDay IS NULL OR @StartTime
+        IS NULL OR @finalTime IS NULL OR @updated_at IS NULL)
+        SELECT 'Error, hay dato(s) vacíos' AS status;
+    
+    ELSE
+        -- Validación ID no existe
+        IF NOT EXISTS(SELECT id
+                      FROM clients
+                      WHERE id = @id)
+            SELECT 'El ID del Proveedor no existe' AS status;
+        -- Actualizar
+        ELSE
+	        UPDATE providers SET name = @name,surname = @surname,telephone = @telephone,direction = @direction,
 						  email = @email,startDay = @startDay,finalDay = @finalDay,StartTime = @StartTime,
 						  finalTime = @finalTime,updated_at = @updated_at
-			WHERE id = @id;
+			        WHERE id = @id;
 END
 
 GO
@@ -515,7 +557,14 @@ CREATE PROCEDURE pa_deleteProvider
 	@id UNIQUEIDENTIFIER
 AS
 BEGIN
-	DELETE FROM providers WHERE id = @id
+    -- Validación ID existe
+    IF NOT EXISTS(SELECT id
+                  FROM providers
+                  WHERE id = @id)
+            SELECT 'El ID del Proveedor no existe' AS status;
+    -- Eliminar
+    ELSE
+        DELETE FROM providers WHERE id = @id
 END
 
 GO
@@ -554,7 +603,14 @@ CREATE PROCEDURE pa_selectMaterial
 	@id BIGINT
 AS
 BEGIN
-	SELECT * FROM materials WHERE id = @id
+	-- Validación ID existe
+    IF NOT EXISTS(SELECT id
+                  FROM materials
+                  WHERE id = @id)
+            SELECT 'El ID del Material no existe' AS status;
+        -- Select
+        ELSE
+        	SELECT * FROM materials WHERE id = @id
 END
 
 GO
@@ -564,7 +620,14 @@ CREATE PROCEDURE pa_selectMaterialByName
 	@name NVARCHAR(255)
 AS
 BEGIN
-	SELECT * FROM materials WHERE name = @name
+	-- Validación ID existe
+    IF NOT EXISTS(SELECT id
+                  FROM clients
+                  WHERE name = @name)
+            SELECT 'El nombre del Material no existe' AS status;
+        -- Select
+        ELSE
+        	SELECT * FROM materials WHERE name = @name
 END
 
 GO
@@ -631,7 +694,14 @@ CREATE PROCEDURE pa_deleteMaterial
 	@id BIGINT
 AS
 BEGIN
-	DELETE FROM materials WHERE id = @id
+	-- Validación ID existe
+    IF NOT EXISTS(SELECT id
+                  FROM materials
+                  WHERE id = @id)
+            SELECT 'El ID del Material no existe' AS status;
+    -- Eliminar
+    ELSE
+        DELETE FROM materials WHERE id = @id
 END
 
 GO
@@ -671,7 +741,14 @@ CREATE PROCEDURE pa_selectProduct
 	@id BIGINT
 AS
 BEGIN
-	SELECT * FROM products WHERE id = @id
+	-- Validación ID existe
+    IF NOT EXISTS(SELECT id
+                  FROM products
+                  WHERE id = @id)
+            SELECT 'El ID del Producto no existe' AS status;
+        -- Select
+        ELSE
+        	SELECT * FROM products WHERE id = @id
 END
 
 GO
@@ -681,7 +758,14 @@ CREATE PROCEDURE pa_selectProductByName
 	@name NVARCHAR(255)
 AS
 BEGIN
-	SELECT * FROM products WHERE name = @name
+	-- Validación ID existe
+    IF NOT EXISTS(SELECT id
+                  FROM clients
+                  WHERE name = @name)
+            SELECT 'El ID del Proveedor no existe' AS status;
+        -- Select
+        ELSE
+        	SELECT * FROM products WHERE name = @name
 END
 
 GO
@@ -749,7 +833,14 @@ CREATE PROCEDURE pa_deleteProduct
 	@id BIGINT
 AS
 BEGIN
-	DELETE FROM products WHERE id = @id
+	-- Validación ID existe
+    IF NOT EXISTS(SELECT id
+                  FROM products
+                  WHERE id = @id)
+            SELECT 'El ID del Producto no existe' AS status;
+    -- Eliminar
+    ELSE
+        DELETE FROM products WHERE id = @id
 END
 
 GO
@@ -786,7 +877,14 @@ CREATE PROCEDURE pa_selectCategory
 	@id BIGINT
 AS
 BEGIN
-	SELECT * FROM categories WHERE id = @id
+	-- Validación ID existe
+    IF NOT EXISTS(SELECT id
+                  FROM categories
+                  WHERE id = @id)
+            SELECT 'El ID de la Categoria no existe' AS status;
+        -- Select
+        ELSE
+        	SELECT * FROM categories WHERE id = @id
 END
 
 GO
@@ -821,7 +919,14 @@ CREATE PROCEDURE pa_deleteCategory
 	@id BIGINT
 AS
 BEGIN
-	DELETE FROM categories WHERE id = @id
+	-- Validación ID existe
+    IF NOT EXISTS(SELECT id
+                  FROM categories
+                  WHERE id = @id)
+            SELECT 'El ID de la Categoria no existe' AS status;
+    -- Eliminar
+    ELSE
+        DELETE FROM categories WHERE id = @id
 END
 
 GO
@@ -864,7 +969,14 @@ CREATE PROCEDURE pa_selectOrder
 	@id BIGINT
 AS
 BEGIN
-	SELECT * FROM orders WHERE id = @id
+	-- Validación ID existe
+    IF NOT EXISTS(SELECT id
+                  FROM orders
+                  WHERE id = @id)
+            SELECT 'El ID del Pedido no existe' AS status;
+        -- Select
+        ELSE
+        	SELECT * FROM orders WHERE id = @id
 END
 
 GO
@@ -894,7 +1006,14 @@ CREATE PROCEDURE pa_deleteOrder
 	@id BIGINT
 AS
 BEGIN
-	DELETE FROM orders WHERE id = @id
+	-- Validación ID existe
+    IF NOT EXISTS(SELECT id
+                  FROM orders
+                  WHERE id = @id)
+            SELECT 'El ID del Pedido no existe' AS status;
+    -- Eliminar
+    ELSE
+        DELETE FROM orders WHERE id = @id
 END
 GO
 
@@ -920,7 +1039,7 @@ GO
 CREATE PROCEDURE pa_readRefunds
 AS
 BEGIN
-	SELECT * FROM orders
+	SELECT * FROM refunds
 END
 
 GO
@@ -930,7 +1049,14 @@ CREATE PROCEDURE pa_selectRefund
 	@id BIGINT
 AS
 BEGIN
-	SELECT * FROM orders WHERE id = @id
+	-- Validación ID existe
+    IF NOT EXISTS(SELECT id
+                  FROM refunds
+                  WHERE id = @id)
+            SELECT 'El ID de la Devolucion no existe' AS status;
+        -- Select
+        ELSE
+        	SELECT * FROM refunds WHERE id = @id
 END
 
 GO
@@ -955,7 +1081,14 @@ CREATE PROCEDURE pa_deleteRefund
 	@id BIGINT
 AS
 BEGIN
-	DELETE FROM orders WHERE id = @id
+	-- Validación ID existe
+    IF NOT EXISTS(SELECT id
+                  FROM orders
+                  WHERE id = @id)
+            SELECT 'El ID de la Devolucion no existe' AS status;
+    -- Eliminar
+    ELSE
+        DELETE FROM refunds WHERE id = @id
 END
 GO
 
@@ -994,17 +1127,31 @@ CREATE PROCEDURE pa_selectCollaborator
 	@id UNIQUEIDENTIFIER
 AS
 BEGIN
-	SELECT id, username, email, role FROM collaborators WHERE id = @id
+	-- Validación ID existe
+    IF NOT EXISTS(SELECT id
+                  FROM clients
+                  WHERE id = @id)
+            SELECT 'El ID del Colaborador no existe' AS status;
+        -- Select
+        ELSE
+        	SELECT id, username, email, role FROM collaborators WHERE id = @id
 END
 
 GO
 
--- SELECTUSERNAME
+-- SELECT USERNAME
 CREATE PROCEDURE pa_selectUserNameCollaborator
 	@username NVARCHAR(255)
 AS
 BEGIN
-	SELECT id, username, email, role FROM collaborators WHERE username = @username
+	-- Validación ID existe
+    IF NOT EXISTS(SELECT id
+                  FROM collaborators
+                  WHERE username = @username)
+            SELECT 'El Nombre de Usuario del Colaborador no existe' AS status;
+        -- Select
+        ELSE
+        	SELECT id, username, email, role FROM collaborators WHERE username = @username
 END
 
 GO
@@ -1030,7 +1177,14 @@ CREATE PROCEDURE pa_deleteCollaborator
 	@id UNIQUEIDENTIFIER
 AS
 BEGIN
-	DELETE FROM collaborators WHERE id = @id
+	-- Validación ID existe
+    IF NOT EXISTS(SELECT id
+                  FROM collaborators
+                  WHERE id = @id)
+            SELECT 'El ID del Colaborador no existe' AS status;
+    -- Eliminar
+    ELSE
+        DELETE FROM collaborators WHERE id = @id
 END
 GO
 
@@ -1081,7 +1235,14 @@ CREATE PROCEDURE pa_selectShipping
 	@id BIGINT
 AS
 BEGIN
-	SELECT * FROM shippings WHERE id = @id
+	-- Validación ID existe
+    IF NOT EXISTS(SELECT id
+                  FROM shippings
+                  WHERE id = @id)
+            SELECT 'El ID del Tipo de Envio no existe' AS status;
+        -- Select
+        ELSE
+        	SELECT * FROM shippings WHERE id = @id
 END
 
 GO
@@ -1091,7 +1252,14 @@ CREATE PROCEDURE pa_selectShippingByName
 	@name NVARCHAR(255)
 AS
 BEGIN
-	SELECT * FROM shippings WHERE name = @name
+	-- Validación ID existe
+    IF NOT EXISTS(SELECT id
+                  FROM shippings
+                  WHERE name = @name)
+            SELECT 'El Nombre del Tipo de Envio no existe' AS status;
+        -- Select
+        ELSE
+        	SELECT * FROM shippings WHERE name = @name
 END
 
 GO
@@ -1117,7 +1285,14 @@ CREATE PROCEDURE pa_deleteShipping
 	@id BIGINT
 AS
 BEGIN
-	DELETE FROM shippings WHERE id = @id
+	-- Validación ID existe
+    IF NOT EXISTS(SELECT id
+                  FROM shippings
+                  WHERE id = @id)
+            SELECT 'El ID del Tipo de Envio no existe' AS status;
+    -- Eliminar
+    ELSE
+        DELETE FROM shippings WHERE id = @id
 END
 GO
 
@@ -1137,15 +1312,21 @@ CREATE PROCEDURE pa_addClient
 	@updated_at DATETIME
 AS
 BEGIN
-    -- No nulls
-    IF NOT EXISTS(SELECT identificationCard, email
-                  FROM clients
-                  WHERE @identificationCard = @identificationCard OR email = @Email)
-	    INSERT INTO clients (id, identificationCard, name, surname, telephone, email, created_at, updated_at)
-	    VALUES (@id, @identificationCard, @name, @surname, @telephone, @email, @created_at, @updated_at)
+    -- Validación nulos
+    IF (@id IS NULL OR @identificationCard IS NULL OR @name IS NULL OR  @surname IS NULL OR @telephone
+        IS NULL OR @email IS NULL OR @created_at  IS NULL OR @updated_at IS NULL)
+        SELECT 'Error, hay dato(s) vacíos' AS status;
+    
     ELSE
-	    SELECT 'Tu cedula o correo ya se encuentran registrados' AS status;
-    -- Msj error nulls
+        -- Validación ID, Cédula o Email ya existentes
+        IF NOT EXISTS(SELECT id, identificationCard, email
+                      FROM clients
+                      WHERE id = @id OR identificationCard = @identificationCard OR email = @email)
+            -- Insertar
+	        INSERT INTO clients (id, identificationCard, name, surname, telephone, email, created_at, updated_at)
+	        VALUES (@id, @identificationCard, @name, @surname, @telephone, @email, @created_at, @updated_at)
+        ELSE
+	        SELECT 'Tu cedula o correo electrónico ya se encuentran registrados' AS status;
 END
 
 GO
@@ -1164,7 +1345,14 @@ CREATE PROCEDURE pa_selectClient
 	@id UNIQUEIDENTIFIER
 AS
 BEGIN
-	SELECT * FROM clients WHERE id = @id
+	-- Validación ID existe
+    IF NOT EXISTS(SELECT id
+                  FROM clients
+                  WHERE id = @id)
+            SELECT 'El ID del Cliente no existe' AS status;
+        -- Select
+        ELSE
+        	SELECT * FROM clients WHERE id = @id
 END
 
 GO
@@ -1193,7 +1381,14 @@ CREATE PROCEDURE pa_deleteClient
 	@id UNIQUEIDENTIFIER
 AS
 BEGIN
-	DELETE FROM clients WHERE id = @id
+	-- Validación ID existe
+    IF NOT EXISTS(SELECT id
+                  FROM clients
+                  WHERE id = @id)
+            SELECT 'El ID del Cliente no existe' AS status;
+    -- Eliminar
+    ELSE
+        DELETE FROM clients WHERE id = @id
 END
 GO
 
@@ -1234,7 +1429,14 @@ CREATE PROCEDURE pa_selectDirection
 	@id BIGINT
 AS
 BEGIN
-	SELECT * FROM directions WHERE id = @id
+	-- Validación ID existe
+    IF NOT EXISTS(SELECT id
+                  FROM directions
+                  WHERE id = @id)
+            SELECT 'El ID de la Direccion no existe' AS status;
+        -- Select
+        ELSE
+        	SELECT * FROM directions WHERE id = @id
 END
 
 GO
@@ -1264,7 +1466,14 @@ CREATE PROCEDURE pa_deleteDirection
 	@id BIGINT
 AS
 BEGIN
-	DELETE FROM directions WHERE id = @id
+	-- Validación ID existe
+    IF NOT EXISTS(SELECT id
+                  FROM directions
+                  WHERE id = @id)
+            SELECT 'El ID de la Direccion no existe' AS status;
+    -- Eliminar
+    ELSE
+        DELETE FROM directions WHERE id = @id
 END
 
 GO
