@@ -9,7 +9,7 @@ class Order extends Model
     protected $table = 'Order';
 
     protected $fillable = [
-        'collaboratorId','clientId','ShippingId','crationDate','deliveryDate','totlaPrice','status'
+        'collaboratorId','clientId','ShippingId','crationDate','deliveryDate','discount','totlaPrice','status'
     ];
 
     public function collaborator(){

@@ -20,6 +20,7 @@ class CreateOrdersTable extends Migration
             $table->bigInteger('ShippingId')->unsigned();
             $table->datetime('creationDate');
             $table->datetime('deliveryDate');
+            $table->integer('discount');
             $table->double('totalPrice');
             $table->string('status');
             $table->timestamps();

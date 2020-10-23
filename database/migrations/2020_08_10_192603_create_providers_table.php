@@ -20,10 +20,10 @@ class CreateProvidersTable extends Migration
             $table->string('telephone');
             $table->string('direction');
             $table->string('email')->unique();
-            $table->date('startDay');
-            $table->date('finalDay');
-            $table->time('StartTime');
-            $table->time('finalTime');
+            $table->string('startDay');
+            $table->string('finalDay');
+            $table->string('StartTime');
+            $table->string('finalTime');
             $table->timestamps();
         });
     }
