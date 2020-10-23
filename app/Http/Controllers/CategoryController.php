@@ -10,58 +10,61 @@ class CategoryController extends Controller
 
     public function __construct(){ $this->middleware('api.auth'); }
 
+    //GET ALL
     public function index(){
-        
+
         $categories = DB::select('exec pa_readCategories');
 
         return response()->json([
-            'code' => 200,
-            'status' => 'success',
-            'data' => $categories
+            'code'      => 200,
+            'status'    => 'success',
+            'data'      => $categories
         ]);
     }
 
+    //GET ONE
     public function show($name)
     {
         $category = DB::select('select * from categories where name = ?', [$name]);
 
         if (count($category) > 0) {
             $data = [
-                'code' => 200,
-                'status' => 'success',
-                'data' => $category
+                'code'      => 200,
+                'status'    => 'success',
+                'data'      => $category
             ];
         } else {
             $data = [
-                'code' => 404,
-                'status' => 'error',
-                'message' => 'La categoria no existe'
+                'code'      => 404,
+                'status'    => 'error',
+                'message'   => 'Error, la categoria no existe.'
             ];
         }
 
         return response()->json($data, $data['code']);
     }
 
+    //POST
     public function store(Request $request){
 
         $json = $request->input('json', null);
         $params_array = json_decode($json, true);
 
         if (!empty($params_array)) {
-   
+
             $validate = \Validator::make($params_array, [
                 'name' => 'required|unique:categories',
             ]);
 
             if ($validate->fails()) {
                 $data = [
-                    'code' => 400,
-                    'status' => 'error',
-                    'message' => 'No se ha guardado la categoria.',
-                    'error' => $validate->errors()
+                    'code'      => 400,
+                    'status'    => 'error',
+                    'message'   => 'Error, el nombre está vacío o ya existe.',
+                    'error'     => $validate->errors()
                 ];
             } else {
-     
+
                 $params_array['created_at'] = new \DateTime();
                 $params_array['updated_at'] = new \DateTime();
 
@@ -73,24 +76,25 @@ class CategoryController extends Controller
                 ]);
 
                 $data = [
-                    'code' => 200,
-                    'status' => 'success',
-                    'message' => 'Categoria guardada',
-                    'data' => $params_array
+                    'code'      => 200,
+                    'status'    => 'success',
+                    'message'   => 'Categoria guardada exitosamente.',
+                    'data'      => $params_array
                 ];
             }
 
         } else {
             $data = [
-                'code' => 400,
-                'status' => 'error',
-                'message' => 'No has enviado ninguna categoria.'
+                'code'      => 400,
+                'status'    => 'error',
+                'message'   => 'No has ingresado ningún dato.'
             ];
         }
 
         return response()->json($data, $data['code']);
     }
 
+    //UPDATE
     public function update($id, Request $request){
 
         $json = $request->input('json', null);
@@ -108,9 +112,9 @@ class CategoryController extends Controller
             if ((count($unique) > 0) && (strtoupper($id) != $unique[0]->id)) {
 
                 $data = array(
-                    'code' => 404,
-                    'status' => 'error',
-                    'message' => 'El el nombre de la categoria ya existe'
+                    'code'      => 404,
+                    'status'    => 'error',
+                    'message'   => 'El el nombre de la categoria ya existe.'
                 );
 
                 return response()->json($data, $data['code']);
@@ -130,21 +134,22 @@ class CategoryController extends Controller
             ]);
 
             $data = [
-                'code' => 200,
-                'status' => 'success',
-                'data' => $params_array
+                'code'      => 200,
+                'status'    => 'success',
+                'data'      => $params_array
             ];
         } else {
             $data = [
-                'code' => 400,
-                'status' => 'error',
-                'message' => 'No has enviado ninguna categoria.'
+                'code'      => 400,
+                'status'    => 'error',
+                'message'   => 'No has ingresado ningún dato.'
             ];
         }
 
         return response()->json($data, $data['code']);
     }
 
+    //DELETE
     public function destroy($id) {
         if (isset($id)) {
 
@@ -155,24 +160,24 @@ class CategoryController extends Controller
                 $delete = DB::delete('exec pa_deleteCategory ?', [$id]);
 
                 $data = [
-                    'code' => 200,
-                    'status' => 'success',
-                    'message' => 'Se elimino correctamente',
-                    'data'  => $delete,
+                    'code'      => 200,
+                    'status'    => 'success',
+                    'message'   => 'Categoría eliminada correctamente.',
+                    'data'      => $delete,
                 ];
             } else {
                 $data = [
-                    'code' => 400,
-                    'status' => 'error',
-                    'message' => 'No se elimino correctamente'
+                    'code'      => 400,
+                    'status'    => 'error',
+                    'message'   => 'Error, la categoría no puede ser eliminada, tiene productos asociados.'
                 ];
             }
         } else {
 
             $data = [
-                'code' => 400,
-                'status' => 'error',
-                'message' => 'No se encontro la categoria'
+                'code'      => 400,
+                'status'    => 'error',
+                'message'   => 'Categoría no encontrada.'
             ];
 
         }

@@ -20,15 +20,44 @@ class ProviderController extends Controller {
      *
      * @return \Illuminate\Http\Response
      */
+    //GET ALL
     public function index() {
-        
+
         $providers = DB::select('exec pa_readProviders');
 
         return response()->json([
-            'code' => 200,
-            'status' => 'success',
-            'data' => $providers
+            'code'      => 200,
+            'status'    => 'success',
+            'data'      => $providers
         ]);
+    }
+
+    /**
+     * Display the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    //GET ONE
+    public function show($id){
+
+        $provider = DB::select('exec pa_selectProvider ?', [$id]);
+
+        if (count($provider) > 0) {
+            $data = [
+                'code'      => 200,
+                'status'    => 'Provider encontrado correctamente.',
+                'data'   => $provider
+            ];
+        } else {
+            $data = [
+                'code'      => 400,
+                'status'    => 'error',
+                'message'   => 'Error, el cliente no existe.'
+            ];
+        }
+
+        return response()->json($data, $data['code']);
     }
 
     /**
@@ -37,6 +66,7 @@ class ProviderController extends Controller {
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
+    //POST
     public function store(Request $request) {
 
         $json = $request->input('json', null);
@@ -44,7 +74,7 @@ class ProviderController extends Controller {
         $params_array = json_decode($json, true);
 
         if (!empty($params) && !empty($params_array)) {
-          
+
               // Validar datos
               $validate = \Validator::make($params_array, [
                 'name'      => 'required',
@@ -52,18 +82,18 @@ class ProviderController extends Controller {
                 'telephone' => 'required',
                 'direction' => 'required',
                 'email'     => 'required|email|unique:providers',
-                'startDay' => 'required',
-                'finalDay' => 'required',
+                'startDay'  => 'required',
+                'finalDay'  => 'required',
                 'StartTime' => 'required',
                 'finalTime' => 'required',
             ]);
 
             if ($validate->fails()) {
                 $data = array(
-                    'status' => 'error',
-                    'code' => 404,
-                    'message' => 'El proveedor no se ha guardado',
-                    'data' => $validate->errors()
+                    'status'    => 'error',
+                    'code'      => 404,
+                    'message'   => 'Error, hay campos vacíos o no cumplen los requisitos.',
+                    'data'      => $validate->errors()
                 );
 
             } else {
@@ -88,44 +118,16 @@ class ProviderController extends Controller {
                 ]);
 
                 $data = [
-                    'code' => 200,
-                    'status' => 'success',
-                    'data' => $params_array
+                    'code'      => 200,
+                    'status'    => 'success',
+                    'data'      => $params_array
                 ];
             }
         } else {
             $data = [
-                'code' => 400,
-                'status' => 'error',
-                'message' => 'Envia los datos correctamente'
-            ];
-        }
-
-        return response()->json($data, $data['code']);
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-  
-    public function show($id){
-
-        $provider = DB::select('exec pa_selectProvider ?', [$id]);
-       
-        if (count($provider) > 0) {
-            $data = [
-                'code' => 200,
-                'status' => 'Provider encontrado correctamente',
-                'message' => $provider
-            ];
-        } else {
-            $data = [
-                'code' => 400,
-                'status' => 'error',
-                'message' => 'Cliente no encontrado'
+                'code'      => 400,
+                'status'    => 'error',
+                'message'   => 'No has ingresado ningún dato.'
             ];
         }
 
@@ -139,14 +141,14 @@ class ProviderController extends Controller {
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
- 
+    //UPDATE
     public function update($id, Request $request){
         $json = $request->input('json', null);
         $params = json_decode($json);
         $params_array = json_decode($json, true);
 
         if (!empty($params_array)) {
-           
+
             $validate = Validator::make($params_array, [
                 'name'      => 'required',
                 'surname'   => 'required',
@@ -163,7 +165,7 @@ class ProviderController extends Controller {
                 $data = [
                     'code'      => 400,
                     'status'    => 'error',
-                    'message'   => 'No se ha actualizado el proovedor, faltan datos',
+                    'message'   => 'Error, hay campos vacíos o no cumplen los requisitos.',
                     'data'      => $validate->errors()
                 ];
             } else {
@@ -171,15 +173,15 @@ class ProviderController extends Controller {
                 $unique = DB::select('exec pa_selectProvider ?', [$params->email]);
 
                 if ((count($unique) > 0) && (strtoupper($id) != $unique[0]->id)) {
- 
+
                     $data = array(
                         'code' => 404,
                         'status' => 'error',
-                        'message' => 'El cliente ya existe'
+                        'message' => 'El proveedor ya existe.'
                     );
                     return response()->json($data, $data['code']);
                 }
-            
+
                 unset($params_array['id']);
                 unset($params_array['created_at']);
 
@@ -210,7 +212,7 @@ class ProviderController extends Controller {
             $data = [
                 'code'      => 400,
                 'status'    => 'error',
-                'message'      => 'Envia los datos correctamente'
+                'message'   => 'No has ingresado ningún dato.'
             ];
         }
 
@@ -223,6 +225,7 @@ class ProviderController extends Controller {
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
+    //DELETE
     public function destroy($id){
         if (isset($id)) {
 
@@ -233,22 +236,22 @@ class ProviderController extends Controller {
                 DB::delete('exec pa_deleteProvider ?', [$id]);
 
                 $data = [
-                    'code' => 200,
-                    'status' => 'success',
-                    'message' => 'Se elimino correctamente'
+                    'code'      => 200,
+                    'status'    => 'success',
+                    'message'   => 'Proveedor eliminado correctamente.'
                 ];
             } else {
                 $data = [
-                    'code' => 400,
-                    'status' => 'error',
-                    'message' => 'No se elimino correctamente'
+                    'code'      => 400,
+                    'status'    => 'error',
+                    'message'   => 'Proveedor no encontrado.'
                 ];
             }
         } else {
             $data = [
-                'code' => 400,
-                'status' => 'error',
-                'message' => 'No se encontro el proveedor'
+                'code'      => 400,
+                'status'    => 'error',
+                'message'   => 'Proveedor no encontrado.'
             ];
         }
 

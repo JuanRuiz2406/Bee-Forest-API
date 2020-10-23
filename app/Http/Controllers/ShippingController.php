@@ -12,77 +12,22 @@ use Uuid;
 
 class ShippingController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware('api.auth');
-    }
+    public function __construct(){ $this->middleware('api.auth'); }
 
+    //GET ALL
     public function index()
     {
 
         $shipping = DB::select('exec pa_readShippings');
 
         return response()->json([
-            'code' => 200,
-            'status' => 'success',
-            'data' => $shipping
+            'code'      => 200,
+            'status'    => 'success',
+            'data'      => $shipping
         ]);
     }
 
-    public function store(Request $request)
-    {
-
-        $json = $request->input('json', null);
-        $params = json_decode($json);
-        $params_array = json_decode($json, true);
-
-        if (!empty($params) && !empty($params_array)) {
-
-            $validate = \Validator::make($params_array, [
-                'name' => 'required',
-                'price' => 'required',
-                'description' => 'required',
-            ]);
-
-            if ($validate->fails()) {
-
-                $data = array(
-                    'status' => 'error',
-                    'code' => 404,
-                    'message' => 'El tipo de envio no se ha guardado',
-                    'data' => $validate->errors()
-                );
-            } else {
-
-                $params_array['created_at'] = new \DateTime();
-                $params_array['updated_at'] = new \DateTime();
-
-                DB::insert('exec pa_addShipping ?,?,?,?,?', [
-                    $params_array['name'],
-                    $params_array['price'],
-                    $params_array['description'],
-                    $params_array['created_at'],
-                    $params_array['updated_at']
-                ]);
-
-                $data = [
-                    'code' => 200,
-                    'status' => 'success',
-                    'message' => 'Tipo de envio guardado.',
-                    'data' => $params_array
-                ];
-            }
-        } else {
-            $data = [
-                'code' => 400,
-                'status' => 'error',
-                'message' => 'Envia los datos correctamente'
-            ];
-        }
-
-        return response()->json($data, $data['code']);
-    }
-
+    //GET ONE
     public function show($shippingId)
     {
         $shipping = DB::select('exec pa_selectShipping ?', $shippingId);
@@ -101,10 +46,64 @@ class ShippingController extends Controller
             ];
         }
 
+        return response()->json($data, $data['code']);
+    }
+
+    //POST
+    public function store(Request $request)
+    {
+
+        $json = $request->input('json', null);
+        $params = json_decode($json);
+        $params_array = json_decode($json, true);
+
+        if (!empty($params) && !empty($params_array)) {
+
+            $validate = \Validator::make($params_array, [
+                'name'          => 'required',
+                'price'         => 'required',
+                'description'   => 'required',
+            ]);
+
+            if ($validate->fails()) {
+
+                $data = array(
+                    'status' => 'error',
+                    'code' => 404,
+                    'message' => 'Error, hay campos vacíos.',
+                    'data' => $validate->errors()
+                );
+            } else {
+
+                $params_array['created_at'] = new \DateTime();
+                $params_array['updated_at'] = new \DateTime();
+
+                DB::insert('exec pa_addShipping ?,?,?,?,?', [
+                    $params_array['name'],
+                    $params_array['price'],
+                    $params_array['description'],
+                    $params_array['created_at'],
+                    $params_array['updated_at']
+                ]);
+
+                $data = [
+                    'code' => 200,
+                    'status' => 'success',
+                    'data' => $params_array
+                ];
+            }
+        } else {
+            $data = [
+                'code' => 400,
+                'status' => 'error',
+                'message' => 'No has ingresado ningún dato.'
+            ];
+        }
 
         return response()->json($data, $data['code']);
     }
 
+    //UPDATE
     public function update($id, Request $request)
     {
         $json = $request->input('json', null);
@@ -123,7 +122,7 @@ class ShippingController extends Controller
                 $data = [
                     'code' => 400,
                     'status' => 'error',
-                    'message' => 'No se ha actualizado el tipo de envio, faltan datos',
+                    'message' => 'Error, hay campos vacíos.',
                     'data' => $validate->errors()
                 ];
             } else {
@@ -135,7 +134,7 @@ class ShippingController extends Controller
                     $data = array(
                         'code' => 404,
                         'status' => 'error',
-                        'message' => 'El el nombre del tipo de envio ya existe'
+                        'message' => 'El nombre del tipo de envío ya existe.'
                     );
 
                     return response()->json($data, $data['code']);
@@ -156,7 +155,6 @@ class ShippingController extends Controller
                 $data = [
                     'code' => 200,
                     'status' => 'success',
-                    'message' => 'Tipo de envio actualizado',
                     'data' => $params_array
                 ];
             }
@@ -164,13 +162,14 @@ class ShippingController extends Controller
             $data = [
                 'code' => 400,
                 'status' => 'error',
-                'message' => 'Envia los datos correctamente'
+                'message' => 'No has ingresado ningún dato.'
             ];
         }
 
         return response()->json($data, $data['code']);
     }
 
+    //DELETE
     public function destroy($id)
     {
         if (isset($id)) {
@@ -184,14 +183,14 @@ class ShippingController extends Controller
                 $data = [
                     'code' => 200,
                     'status' => 'success',
-                    'message' => 'Se elimino correctamente',
+                    'message' => 'Tipo de Envío eliminado correctamente.',
                     'data'  => $delete,
                 ];
             } else {
                 $data = [
                     'code' => 400,
                     'status' => 'error',
-                    'message' => 'No se elimino correctamente'
+                    'message' => 'Tipo de envío no encontrado.'
                 ];
             }
         } else {
@@ -199,7 +198,7 @@ class ShippingController extends Controller
             $data = [
                 'code' => 400,
                 'status' => 'error',
-                'message' => 'No se encontro el tipo de envio'
+                'message' => 'Tipo de envío no encontrado.'
             ];
         }
 

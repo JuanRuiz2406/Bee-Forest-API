@@ -11,23 +11,43 @@ use App\Helpers\JwtAuth;
 class ProductController extends Controller
 {
 
-    public function __construct()
-    {
-        $this->middleware('api.auth');
-    }
+    public function __construct(){ $this->middleware('api.auth'); }
 
+    //GET ALL
     public function index()
     {
 
         $products = DB::select('exec pa_readProducts');
 
         return response()->json([
-            'code' => 200,
-            'status' => 'success',
-            'data' => $products
+            'code'      => 200,
+            'status'    => 'success',
+            'data'      => $products
         ]);
     }
 
+    //GET ONE
+    public function show($productId)
+    {
+        $product = DB::select('exec pa_selectProduct ?', $productId);
+        if (is_object($product)) {
+            $data = [
+                'code'      => 200,
+                'status'    => 'success',
+                'data'      => $product
+            ];
+        } else {
+            $data = [
+                'code'      => 400,
+                'status'    => 'error',
+                'message'   => 'Error, el producto no existe.'
+            ];
+        }
+
+        return response()->json($data, $data['code']);
+    }
+
+    //POST
     public function store(Request $request)
     {
 
@@ -38,17 +58,17 @@ class ProductController extends Controller
         if (!empty($params_array)) {
 
             $validate = \Validator::make($params_array, [
-                'categoryId' => 'required',
-                'name' => 'required|unique:products',
-                'price' => 'required'
+                'categoryId'    => 'required',
+                'name'          => 'required|unique:products',
+                'price'         => 'required'
             ]);
 
             if ($validate->fails()) {
                 $data = [
-                    'code' => 400,
-                    'status' => 'error',
-                    'message' => 'No se ha guardado el producto, faltan datos',
-                    'data' => $validate->errors()
+                    'code'      => 400,
+                    'status'    => 'error',
+                    'message'   => 'Error, hay campos vacíos o no cumplen los requisitos.',
+                    'data'      => $validate->errors()
                 ];
             } else {
 
@@ -67,7 +87,7 @@ class ProductController extends Controller
                 ]);
 
                 /* Esto pa otro dia
-                
+
                 //Buscar el producto
                 $product = DB::select('exec pa_selectProductByName ?', [$params->name]);
 
@@ -117,44 +137,23 @@ class ProductController extends Controller
                 }
                 */
                 $data = [
-                    'code' => 200,
-                    'status' => 'success',
-                    'data' => $params_array
+                    'code'      => 200,
+                    'status'    => 'success',
+                    'data'      => $params_array
                 ];
             }
         } else {
             $data = [
-                'code' => 400,
-                'status' => 'error',
-                'message' => 'Envia los datos correctamente'
+                'code'      => 400,
+                'status'    => 'error',
+                'message'   => 'No has ingresado ningún dato.'
             ];
         }
 
         return response()->json($data, $data['code']);
     }
 
-    public function show($productId)
-    {
-        $product = DB::select('exec pa_selectProduct ?', $productId);
-        if (is_object($product)) {
-            $data = [
-                'code' => 200,
-                'status' => 'success',
-                'message' => 'Producto encontrado correctamente',
-                'data' => $product
-            ];
-        } else {
-            $data = [
-                'code' => 400,
-                'status' => 'error',
-                'message' => 'Producto no encontrado o id de producto no existe'
-            ];
-        }
-
-
-        return response()->json($data, $data['code']);
-    }
-
+    //UPDATE
     public function update($id, Request $request)
     {
         $json = $request->input('json', null);
@@ -164,18 +163,18 @@ class ProductController extends Controller
         if (!empty($params_array)) {
 
             $validate = \Validator::make($params_array, [
-                'categoryId' => 'required',
-                'name' => 'required',
-                'price' => 'required',
-                'amount' => 'required',
+                'categoryId'    => 'required',
+                'name'          => 'required',
+                'price'         => 'required',
+                'amount'        => 'required',
             ]);
 
             if ($validate->fails()) {
                 $data = [
-                    'code' => 400,
-                    'status' => 'error',
-                    'message' => 'No se ha actualizado el producto, faltan datos',
-                    'data' => $validate->errors()
+                    'code'      => 400,
+                    'status'    => 'error',
+                    'message'   => 'No se ha actualizado el producto, faltan datos',
+                    'data'      => $validate->errors()
                 ];
             } else {
 
@@ -184,9 +183,9 @@ class ProductController extends Controller
                 if ((count($unique) > 0) && (strtoupper($id) != $unique[0]->id)) {
 
                     $data = array(
-                        'code' => 404,
-                        'status' => 'error',
-                        'message' => 'El el nombre del producto ya existe'
+                        'code'      => 404,
+                        'status'    => 'error',
+                        'message'   => 'El el nombre del producto ya existe.'
                     );
 
                     return response()->json($data, $data['code']);
@@ -207,22 +206,23 @@ class ProductController extends Controller
                 ]);
 
                 $data = [
-                    'code' => 200,
-                    'status' => 'success',
-                    'data' => $params_array
+                    'code'      => 200,
+                    'status'    => 'success',
+                    'data'      => $params_array
                 ];
             }
         } else {
             $data = [
-                'code' => 400,
-                'status' => 'error',
-                'message' => 'Envia los datos correctamente'
+                'code'      => 400,
+                'status'    => 'error',
+                'message'   => 'No has ingresado ningún dato.'
             ];
         }
 
         return response()->json($data, $data['code']);
     }
 
+    //DELETE
     public function destroy($id)
     {
         if (isset($id)) {
@@ -234,24 +234,24 @@ class ProductController extends Controller
                 $delete = DB::delete('exec pa_deleteProduct ?', [$id]);
 
                 $data = [
-                    'code' => 200,
-                    'status' => 'success',
-                    'message' => 'Se elimino correctamente',
-                    'data'  => $delete,
+                    'code'      => 200,
+                    'status'    => 'success',
+                    'message'   => 'Producto eliminado correctamente.',
+                    'data'      => $delete,
                 ];
             } else {
                 $data = [
-                    'code' => 400,
-                    'status' => 'error',
-                    'message' => 'No se elimino correctamente'
+                    'code'      => 400,
+                    'status'    => 'error',
+                    'message'   => 'Producto no encontrado.'
                 ];
             }
         } else {
 
             $data = [
-                'code' => 400,
-                'status' => 'error',
-                'message' => 'No se encontro el producto'
+                'code'      => 400,
+                'status'    => 'error',
+                'message'   => 'Producto no encontrado.'
             ];
         }
 

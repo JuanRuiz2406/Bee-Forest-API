@@ -12,6 +12,41 @@ class MaterialController extends Controller {
 
     public function __construct(){ $this->middleware('api.auth'); }
 
+    //GET ALL
+    public function index(){
+
+        $materials = DB::select('exec pa_readMaterials');
+
+        return response()->json([
+            'code'      => 200,
+            'status'    => 'success',
+            'data'      => $materials
+        ]);
+    }
+
+    //GET ONE
+    public function show($id){
+
+        $material = DB::select('exec pa_selectMaterial ?', [$id]);
+
+        if (count($material) > 0) {
+            $data = [
+                'code'      => 200,
+                'status'    => 'success',
+                'data'      => $material
+            ];
+        } else {
+            $data = [
+                'code'      => 400,
+                'status'    => 'error',
+                'message'   => 'Error, el material no existe'
+            ];
+        }
+
+        return response()->json($data, $data['code']);
+    }
+
+    //POST
     public function store(Request $request) {
 
         $json = $request->input('json', null);
@@ -30,7 +65,7 @@ class MaterialController extends Controller {
                 $data = array(
                     'status'    => 'error',
                     'code'      => 404,
-                    'message'   => 'El material no se a guardado',
+                    'message'   => 'Error, hay campos vacíos o no cumplen los requisitos',
                     'data'      => $validate->errors()
                 );
 
@@ -51,7 +86,7 @@ class MaterialController extends Controller {
                 $data = [
                     'code'      => 200,
                     'status'    => 'success',
-                    'message'   => 'El material se a guardado correctamente.',
+                    'message'   => 'Material registrado correctamente.',
                     'data'      => $params_array
                 ];
 
@@ -61,47 +96,14 @@ class MaterialController extends Controller {
             $data = [
                 'code'      => 400,
                 'status'    => 'error',
-                'message'      => 'Envia los datos correctamente'
+                'message'   => 'No has ingresado ningún dato.'
             ];
         }
 
         return response()->json($data, $data['code']);
     }
 
-    public function index(){
-
-        $materials = DB::select('exec pa_readMaterials');
-
-        return response()->json([
-            'code' => 200,
-            'status' => 'success',
-            'message'   => 'Lista de materiales',
-            'data' => $materials
-        ]);
-    }
-
-    public function show($id){
-
-        $material = DB::select('exec pa_selectMaterial ?', [$id]);
-
-        if (count($material) > 0) {
-            $data = [
-                'code' => 200,
-                'status' => 'success',
-                'message' => 'Material encontrada correctamente',
-                'data' => $material
-            ];
-        } else {
-            $data = [
-                'code' => 400,
-                'status' => 'error',
-                'message' => 'Provedor no cuenta con materiales'
-            ];
-        }
-
-        return response()->json($data, $data['code']);
-    }
-
+    //UPDATE
     public function update($id, Request $request){
 
         $json = $request->input('json', null);
@@ -111,30 +113,29 @@ class MaterialController extends Controller {
         if (!empty($params_array)) {
 
             $validate = \Validator::make($params_array, [
-                'providerId' => 'required',
-                'name' => 'required',
-                'price' => 'required',
-                'amount' => 'required'
+                'providerId'    => 'required',
+                'name'          => 'required',
+                'price'         => 'required',
+                'amount'        => 'required'
             ]);
 
             if ($validate->fails()) {
                 $data = [
-                    'code' => 400,
-                    'status' => 'error',
-                    'message' => 'No se ha actualizado el material, faltan datos',
-                    'data' => $validate->errors()
+                    'code'      => 400,
+                    'status'    => 'error',
+                    'message'   => 'Error, hay campos vacíos.',
+                    'data'      => $validate->errors()
                 ];
             } else {
-
 
                 $unique = DB::select('exec pa_selectMaterialByName ?', [$params->name]);
 
                 if ((count($unique) > 0) && (strtoupper($id) != $unique[0]->id)) {
 
                     $data = array(
-                        'code' => 404,
-                        'status' => 'error',
-                        'message' => 'El el nombre del material ya existe'
+                        'code'      => 404,
+                        'status'    => 'error',
+                        'message'   => 'El el nombre del material ya existe'
                     );
                     return response()->json($data, $data['code']);
                 }
@@ -153,23 +154,23 @@ class MaterialController extends Controller {
                 ]);
 
                 $data = [
-                    'code' => 200,
-                    'status' => 'success',
-                    'message' => 'Materiales actualizados',
-                    'data' => $params_array
+                    'code'      => 200,
+                    'status'    => 'success',
+                    'data'      => $params_array
                 ];
             }
         } else {
             $data = [
-                'code' => 400,
-                'status' => 'error',
-                'message' => 'Envia los datos correctamente'
+                'code'      => 400,
+                'status'    => 'error',
+                'message'   => 'No has ingresado ningún dato.'
             ];
         }
 
         return response()->json($data, $data['code']);
     }
 
+    //DELETE
     public function destroy($id) {
         if (isset($id)) {
 
@@ -180,24 +181,24 @@ class MaterialController extends Controller {
                 $delete = DB::delete('exec pa_deleteMaterial ?', [$id]);
 
                 $data = [
-                    'code' => 200,
-                    'status' => 'success',
-                    'message' => 'Se elimino correctamente',
-                    'data'  => $delete,
+                    'code'      => 200,
+                    'status'    => 'success',
+                    'message'   => 'Material eliminado correctamente.',
+                    'data'      => $delete,
                 ];
             } else {
                 $data = [
-                    'code' => 400,
-                    'status' => 'error',
-                    'message' => 'No se elimino correctamente'
+                    'code'      => 400,
+                    'status'    => 'error',
+                    'message'   => 'Material no encontrado.'
                 ];
             }
         } else {
 
             $data = [
-                'code' => 400,
-                'status' => 'error',
-                'message' => 'No se encontro el material'
+                'code'      => 400,
+                'status'    => 'error',
+                'message'   => 'Material no encontrado.'
             ];
 
         }

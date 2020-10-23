@@ -6,10 +6,45 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
-use Uuid; 
+use Uuid;
 
 class CollaboratorController extends Controller{
 
+    //GET ALL
+    //FALTA QUE JALE EL COLLABORADOR LOGUEADO AHORITA
+    public function index(){
+        $collaborator = DB::select('exec pa_readCollaborators');
+
+        return response()->json([
+            'code'      => 200,
+            'status'    => 'success',
+            'data'      => $collaborator
+        ]);
+    }
+
+    //GET ONE
+    public function detail($id) {
+
+        $collaborator = DB::select('exec pa_selectCollaborator ?', [$id]);
+
+        if (count($collaborator) > 0) {
+            $data = array(
+                'code'      => 200,
+                'status'    => 'success',
+                'data'      => $collaborator
+            );
+        } else {
+            $data = array(
+                'code'      => 404,
+                'status'    => 'error',
+                'message'   => 'Error, el colaborador no existe.'
+            );
+        }
+
+        return response()->json($data, $data['code']);
+    }
+
+    //POST
     public function register(Request $request){
 
         $json = $request->input('json', null);
@@ -21,19 +56,19 @@ class CollaboratorController extends Controller{
             $params_array = array_map('trim', $params_array);
 
             $validate = \Validator::make($params_array, [
-                'username' => 'required|unique:collaborators',
-                'email' => 'required|email',
-                'role' => 'required',
-                'password' => 'required',
+                'username'  => 'required|unique:collaborators',
+                'email'     => 'required|email',
+                'role'      => 'required',
+                'password'  => 'required',
             ]);
 
             if ($validate->fails()) {
-           
+
                 $data = array(
-                    'status' => 'error',
-                    'code' => 404,
-                    'message' => 'El colaborador no se ha creado',
-                    'data' => $validate->errors()
+                    'status'    => 'error',
+                    'code'      => 404,
+                    'message'   => 'Error, hay campos vacíos o no cumplen los requisitos',
+                    'data'      => $validate->errors()
                 );
             } else {
 
@@ -55,22 +90,23 @@ class CollaboratorController extends Controller{
                 ]);
 
                 $data = array(
-                    'status' => 'success',
-                    'code' => 200,
-                    'message' => 'El colaborador se ha registrado correctamente'
+                    'status'    => 'success',
+                    'code'      => 200,
+                    'message'   => 'Colaborador registrado correctamente.'
                 );
             }
         } else {
             $data = array(
-                'status' => 'error',
-                'code' => 404,
-                'message' => 'Los datos enviados no son correctos'
+                'status'    => 'error',
+                'code'      => 404,
+                'message'   => 'No has ingresado ningún dato.'
             );
         }
 
         return response()->json($data, $data['code']);
     }
 
+    //LOGIN
     public function login(Request $request){
 
         $jwtAuth = new \JwtAuth();
@@ -82,17 +118,17 @@ class CollaboratorController extends Controller{
 
         // Validar esos datos
         $validate = \Validator::make($params_array, [
-            'username' => 'required',
-            'password' => 'required'
+            'username'  => 'required',
+            'password'  => 'required'
         ]);
 
         if ($validate->fails()) {
             // La validación ha fallado
             $signup = array(
-                'status' => 'error',
-                'code' => 404,
-                'message' => 'El colaborador no se ha podido identificar',
-                'data' => $validate->errors()
+                'status'    => 'error',
+                'code'      => 404,
+                'message'   => 'Datos erroneos de colaborador.',
+                'data'      => $validate->errors()
             );
         } else {
 
@@ -108,6 +144,7 @@ class CollaboratorController extends Controller{
         return response()->json($signup, 200);
     }
 
+    //UPDATE
     public function update(Request $request){
 
         $token = $request->header('Authorization');
@@ -119,23 +156,22 @@ class CollaboratorController extends Controller{
 
         if ($checkToken && !empty($params)) {
 
-
             $collaborator = $jwtAuth->checkToken($token, true);
             $params_array =  (array) $params;
 
             $validate = \Validator::make($params_array, [
-                'username' => 'required|unique:collaborators' . $collaborator->id,
-                'email' => 'required|email',
-                'password' => 'required',
+                'username'  => 'required|unique:collaborators' . $collaborator->id,
+                'email'     => 'required|email',
+                'password'  => 'required',
             ]);
 
             $unique = DB::select('exec pa_selectUserNameCollaborator ? ', [$params->username]);
 
             if ((count($unique) > 0) && ($collaborator->username != $unique[0]->username)) {
                 $data = array(
-                    'code' => 404,
-                    'status' => 'error',
-                    'message' => 'El colaborador ya existe'
+                    'code'      => 404,
+                    'status'    => 'error',
+                    'message'   => 'El nombre de usuario del colaborador ya existe en el sistema.'
                 );
             return response()->json($data, $data['code']);
             }
@@ -155,52 +191,32 @@ class CollaboratorController extends Controller{
             $params_array['updated_at'] = new \DateTime();
 
             DB::update('exec pa_updateCollaborator ?, ?, ?, ?, ?, ?', [
-                            $params_array['id'],
-                            $params_array['username'],
-                            $params_array['password'],
-                            $params_array['email'],
-                            $params_array['role'],
-                            $params_array['updated_at']
+                $params_array['id'],
+                $params_array['username'],
+                $params_array['password'],
+                $params_array['email'],
+                $params_array['role'],
+                $params_array['updated_at']
             ]);
 
             $data = array(
-                'code' => 200,
-                'status' => 'success',
-                'collaborator' => $collaborator,
-                'data' => $params_array
+                'code'          => 200,
+                'status'        => 'success',
+                'collaborator'  => $collaborator,
+                'data'          => $params_array
             );
         } else {
             $data = array(
-                'code' => 400,
-                'status' => 'error',
-                'message' => 'El colaborador no está identificado.'
+                'code'      => 400,
+                'status'    => 'error',
+                'message'   => 'El colaborador no está identificado o ha brindado datos vacíos.'
             );
         }
 
         return response()->json($data, $data['code']);
     }
 
-   public function detail($id) {
-
-        $collaborator = DB::select('exec pa_selectCollaborator ?', [$id]);
-
-        if (count($collaborator) > 0) {
-            $data = array(
-                'code' => 200,
-                'status' => 'success',
-                'data' => $collaborator
-            );
-        } else {
-            $data = array(
-                'code' => 404,
-                'status' => 'error',
-                'message' => 'El colaborador no existe.'
-            );
-        }
-
-        return response()->json($data, $data['code']);
-    }
-
+    //DELETE
     public function destroy($id){
 
         $collaborator = DB::select('exec pa_selectCollaborator ?', [$id]);
@@ -212,25 +228,25 @@ class CollaboratorController extends Controller{
                 DB::delete('exec pa_deleteCollaborator ?', [$id]);
 
                 $data = [
-                    'code' => 200,
-                    'status' => 'success',
-                    'data' => $collaborator
+                    'code'      => 200,
+                    'status'    => 'success',
+                    'data'      => $collaborator
                 ];
 
             }else{
 
                 $data = [
-                    'code' => 404,
-                    'status' => 'error',
-                    'message' => 'colaborador admin no se puede eliminar'
+                    'code'      => 404,
+                    'status'    => 'error',
+                    'message'   => 'Colaboradores admin no se pueden eliminar.'
                 ];
             }
 
         } else {
             $data = [
-                'code' => 404,
-                'status' => 'error',
-                'message' => 'El colaborador no existe'
+                'code'      => 404,
+                'status'    => 'error',
+                'message'   => 'Colaborador no encontrado.'
             ];
         }
 
