@@ -172,7 +172,7 @@ class ProviderController extends Controller {
                 ];
             } else {
 
-                $unique = DB::select('exec pa_selectProvider ?', [$params->email]);
+                $unique = DB::select('exec pa_selectProviderByEmail ?', [$params->email]);
 
                 if ((count($unique) > 0) && (strtoupper($id) != $unique[0]->id)) {
 

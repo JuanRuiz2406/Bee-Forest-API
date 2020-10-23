@@ -210,7 +210,7 @@ class ProductController extends Controller
                 $data = [
                     'code'      => 200,
                     'status'    => 'success',
-                    'message'   => 'Producto actualizado correctamente.'
+                    'message'   => 'Producto actualizado correctamente.',
                     'data'      => $params_array
                 ];
             }

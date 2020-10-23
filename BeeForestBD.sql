@@ -162,6 +162,7 @@ CREATE TABLE orders(
 	ShippingId BIGINT NOT NULL,
 	creationDate DATETIME NOT NULL,
 	deliveryDate DATETIME NOT NULL,
+	discount INT NOT NULL,
 	totalPrice FLOAT NOT NULL,
 	[status] NVARCHAR(255) NOT NULL,
 	created_at DATETIME NULL,
@@ -182,28 +183,6 @@ CREATE TABLE orders(
 
 GO
 
-PRINT 'Creando tabla dispatch_tickets'
-GO
-
-CREATE TABLE dispatch_tickets(
-	id BIGINT IDENTITY(1,1) NOT NULL,
-	orderId BIGINT NOT NULL,
-	totalPrice FLOAT NOT NULL,
-	dispatchDate DATE NOT NULL,
-	[status] NVARCHAR(255) NOT NULL,
-	discount INT NOT NULL,
-	created_at DATETIME NULL,
-	updated_at DATETIME NULL,
-
-	CONSTRAINT dispatch_tickets_pk
-	PRIMARY KEY (id),
-
-	CONSTRAINT dispatch_tickets_orders_fk
-	FOREIGN KEY (orderId) REFERENCES orders
-)
-
-GO
-
 PRINT 'Creando tabla providers'
 GO
 
@@ -214,10 +193,10 @@ CREATE TABLE providers(
 	telephone NVARCHAR(255) NOT NULL,
 	direction NVARCHAR(255) NOT NULL,
 	email NVARCHAR(255) NOT NULL,
-	startDay DATE NOT NULL,
-	finalDay DATE NOT NULL,
-	StartTime TIME(7) NOT NULL,
-	finalTime TIME(7) NOT NULL,
+	startDay NVARCHAR(255) NOT NULL,
+	finalDay NVARCHAR(255) NOT NULL,
+	StartTime NVARCHAR(255) NOT NULL,
+	finalTime NVARCHAR(255) NOT NULL,
 	created_at DATETIME NULL,
 	updated_at DATETIME NULL,
 
@@ -463,10 +442,10 @@ CREATE PROCEDURE pa_addProvider
 	@telephone NVARCHAR(255),
 	@direction NVARCHAR(255),
 	@email NVARCHAR(255),
-    @startDay DATE,
-    @finalDay DATE,
-    @StartTime TIME(7),
-    @finalTime TIME(7),
+    @startDay NVARCHAR(255),
+    @finalDay NVARCHAR(255),
+    @StartTime NVARCHAR(255),
+    @finalTime NVARCHAR(255),
 	@created_at DATETIME,
 	@updated_at DATETIME
 AS
@@ -488,8 +467,8 @@ END
 
 GO
 
--- SELECT
-CREATE PROCEDURE pa_selectProvider
+-- SELECT BY EMAIL
+CREATE PROCEDURE pa_selectProviderByEmail
 	@email NVARCHAR(255)
 AS
 BEGIN
@@ -498,9 +477,9 @@ END
 
 GO
 
--- SELECT By Id
+-- SELECT BY ID
 CREATE PROCEDURE pa_selectProviderById
-		@id UNIQUEIDENTIFIER
+	@id UNIQUEIDENTIFIER
 AS
 BEGIN
 	SELECT * FROM providers WHERE id = @id
@@ -516,10 +495,10 @@ CREATE PROCEDURE pa_updateProvider
 	@telephone NVARCHAR(255),
 	@direction NVARCHAR(255),
 	@email NVARCHAR(255),
-    @startDay DATE,
-    @finalDay DATE,
-    @StartTime TIME(7),
-    @finalTime TIME(7),
+    @startDay NVARCHAR(255),
+    @finalDay NVARCHAR(255),
+    @StartTime NVARCHAR(255),
+    @finalTime NVARCHAR(255),
 	@updated_at DATETIME
 AS
 BEGIN
@@ -858,14 +837,15 @@ CREATE PROCEDURE pa_addOrder
 	@ShippingId BIGINT,
 	@creationDate DATETIME,
 	@deliveryDate DATETIME,
+	@discount INT,
 	@totalPrice FLOAT,
 	@status NVARCHAR(255),
 	@created_at DATETIME,
 	@updated_at DATETIME
 AS
 BEGIN
-	INSERT INTO orders (collaboratorId, clientId, ShippingId, creationDate, deliveryDate, totalPrice, status, created_at, updated_at)
-	VALUES (@collaboratorId, @clientId, @ShippingId, @creationDate, @deliveryDate, @totalPrice, @status, @created_at, @updated_at)
+	INSERT INTO orders (collaboratorId, clientId, ShippingId, creationDate, deliveryDate, discount, totalPrice, status, created_at, updated_at)
+	VALUES (@collaboratorId, @clientId, @ShippingId, @creationDate, @deliveryDate, @discount, @totalPrice, @status, @created_at, @updated_at)
 END
 
 GO
@@ -895,6 +875,7 @@ CREATE PROCEDURE pa_updateOrder
 	@collaboratorId UNIQUEIDENTIFIER,
 	@clientId UNIQUEIDENTIFIER,
 	@shippingId BIGINT,
+	@discount INT,
 	@totalPrice FLOAT,
 	@status NVARCHAR(255),
 	@updated_at DATETIME
@@ -1288,74 +1269,6 @@ END
 
 GO
 
-
-PRINT 'Creando procedimientos almacenados CRUD para la tabla DispatchTickets'
-GO
-
--- INSERT
-CREATE PROCEDURE pa_addDispathTicker
-	@orderId BIGINT,
-	@totalPrice FLOAT,
-	@dispatchDate DATE,
-	@status NVARCHAR(255),
-	@discount INT,
-	@created_at DATETIME,
-	@updated_at DATETIME
-AS
-BEGIN
-	INSERT INTO dispatch_tickets (orderId, totalPrice, dispatchDate, status, discount, created_at, updated_at)
-	VALUES (@orderId, @totalPrice, @dispatchDate, @status, @discount, @created_at, @updated_at)
-END
-
-GO
-
--- READ
-CREATE PROCEDURE pa_readDispatchTickets
-AS
-BEGIN
-	SELECT * FROM dispatch_tickets
-END
-
-GO
-
--- SELECT
-CREATE PROCEDURE pa_selectDispatchTicket
-	@id BIGINT
-AS
-BEGIN
-	SELECT * FROM dispatch_tickets WHERE id = @id
-END
-
-GO
-
--- UPDATE
-CREATE PROCEDURE pa_updateDispathTicker
-	@id BIGINT,
-	@orderId BIGINT,
-	@totalPrice FLOAT,
-	@dispatchDate DATE,
-	@status NVARCHAR(255),
-	@discount INT,
-	@created_at DATETIME,
-	@updated_at DATETIME
-AS
-BEGIN
-	UPDATE dispatch_tickets SET orderId = @orderId, totalPrice = @totalPrice, dispatchDate = @dispatchDate,
-									status = @status, discount =@discount, updated_at = @updated_at
-			WHERE id = @id;
-END
-
-GO
-
--- DELETE
-CREATE PROCEDURE pa_deleteDispatchTicket
-	@id BIGINT
-AS
-BEGIN
-	DELETE FROM dispatch_tickets WHERE id = @id
-END
-GO
-
 -- ------------------------------------------------------------------------ --
 --                          CREACION DE FUNCIONES                           --
 -- ------------------------------------------------------------------------ --
@@ -1699,7 +1612,7 @@ GO
 -- Sumar productos al insertar devolucion
 -- dis_refundInsert
 
--- ESTE TRIGGER DEBER�A SER EN product_refund, EN CADA INSERCI�N QUE VALIDE SI EL AMOUNT ES V�LIDO
+-- ESTE TRIGGER DEBERIA SER EN product_refund, EN CADA INSERCION QUE VALIDE SI EL AMOUNT ES VALIDO
 -- CONSULTA: EMPEZANDO DESDE refund (ID) JOIN orders (ORDERID) JOIN product_order (SACAR AMOUNT Y PRODUCTID)
 -- SI AMOUNT(product_refund) ES <= A AMOUNT(product_refund) INSERTAR
 -- ELSE CANCEL
