@@ -32,6 +32,7 @@ class ClientController extends Controller {
             $data = [
                 'code'      => 200,
                 'status'    => 'success',
+                'message'   => 'Cliente encontrado correctamente.',
                 'data'      => $client
             ];
         } else {
@@ -149,7 +150,7 @@ class ClientController extends Controller {
                 $params_array['id'] = $id;
                 $params_array['updated_at'] = new \DateTime();
 
-             $f =    DB::update('exec pa_updateClient ?,?,?,?,?,?,?', [
+                $f = DB::update('exec pa_updateClient ?,?,?,?,?,?,?', [
                     $params_array['id'],
                     $params_array['identificationCard'],
                     $params_array['name'],

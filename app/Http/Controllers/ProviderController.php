@@ -46,7 +46,8 @@ class ProviderController extends Controller {
         if (count($provider) > 0) {
             $data = [
                 'code'      => 200,
-                'status'    => 'Provider encontrado correctamente.',
+                'status'    => 'success.',
+                'message'    => 'Proveedor encontrado correctamente.',
                 'data'   => $provider
             ];
         } else {
@@ -120,6 +121,7 @@ class ProviderController extends Controller {
                 $data = [
                     'code'      => 200,
                     'status'    => 'success',
+                    'message'    => 'Proveedor registrado correctamente.',
                     'data'      => $params_array
                 ];
             }
@@ -205,6 +207,7 @@ class ProviderController extends Controller {
                 $data = [
                     'code'      => 200,
                     'status'    => 'success',
+                    'message'   => 'Proveedor actualizado correctamente.',
                     'data'      => $params_array
                 ];
             }

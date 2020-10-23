@@ -34,6 +34,7 @@ class ProductController extends Controller
             $data = [
                 'code'      => 200,
                 'status'    => 'success',
+                'message'   => 'Producto encontrado correctamente.',
                 'data'      => $product
             ];
         } else {
@@ -139,6 +140,7 @@ class ProductController extends Controller
                 $data = [
                     'code'      => 200,
                     'status'    => 'success',
+                    'message'   => 'Producto registrado correctamente.',
                     'data'      => $params_array
                 ];
             }
@@ -208,6 +210,7 @@ class ProductController extends Controller
                 $data = [
                     'code'      => 200,
                     'status'    => 'success',
+                    'message'   => 'Producto actualizado correctamente.'
                     'data'      => $params_array
                 ];
             }

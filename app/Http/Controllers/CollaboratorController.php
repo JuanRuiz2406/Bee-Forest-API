@@ -31,6 +31,7 @@ class CollaboratorController extends Controller{
             $data = array(
                 'code'      => 200,
                 'status'    => 'success',
+                'message'   => 'Colaborador encontrado correctamente.',
                 'data'      => $collaborator
             );
         } else {
@@ -202,6 +203,7 @@ class CollaboratorController extends Controller{
             $data = array(
                 'code'          => 200,
                 'status'        => 'success',
+                'message'       => 'Colaborador actualizado correctamente.',
                 'collaborator'  => $collaborator,
                 'data'          => $params_array
             );
@@ -230,6 +232,7 @@ class CollaboratorController extends Controller{
                 $data = [
                     'code'      => 200,
                     'status'    => 'success',
+                    'message'   => 'Colaborador eliminado correctamente.',
                     'data'      => $collaborator
                 ];
 

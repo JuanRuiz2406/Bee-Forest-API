@@ -32,6 +32,7 @@ class DirectionController extends Controller {
             $data = [
                 'code'      => 200,
                 'status'    => 'success',
+                'message'   => 'Dirección encontrada correctamente.',
                 'data'      => $direction
             ];
         } else {
@@ -152,6 +153,7 @@ class DirectionController extends Controller {
                 $data = [
                     'code'   => 200,
                     'status' => 'success',
+                    'message'=> 'Dirección actualizada correctamente.',
                     'data'   => $params_array
                 ];
             }

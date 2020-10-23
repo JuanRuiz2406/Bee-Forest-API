@@ -35,14 +35,14 @@ class ShippingController extends Controller
             $data = [
                 'code' => 200,
                 'status' => 'success',
-                'message' => 'Tipo de envio encontrado correctamente',
+                'message' => 'Tipo de envio encontrado correctamente.',
                 'data' => $shipping
             ];
         } else {
             $data = [
                 'code' => 400,
                 'status' => 'error',
-                'message' => 'Tipo de envio no encontrado o id de producto no existe'
+                'message' => 'Tipo de envio no encontrado o id de producto no existe.'
             ];
         }
 
@@ -68,10 +68,10 @@ class ShippingController extends Controller
             if ($validate->fails()) {
 
                 $data = array(
-                    'status' => 'error',
-                    'code' => 404,
-                    'message' => 'Error, hay campos vacíos.',
-                    'data' => $validate->errors()
+                    'status'    => 'error',
+                    'code'      => 404,
+                    'message'   => 'Error, hay campos vacíos.',
+                    'data'      => $validate->errors()
                 );
             } else {
 
@@ -87,16 +87,17 @@ class ShippingController extends Controller
                 ]);
 
                 $data = [
-                    'code' => 200,
-                    'status' => 'success',
-                    'data' => $params_array
+                    'code'      => 200,
+                    'status'    => 'success',
+                    'message'   => 'Tipo de envio registrado correctamente.',
+                    'data'      => $params_array
                 ];
             }
         } else {
             $data = [
-                'code' => 400,
-                'status' => 'error',
-                'message' => 'No has ingresado ningún dato.'
+                'code'      => 400,
+                'status'    => 'error',
+                'message'   => 'No has ingresado ningún dato.'
             ];
         }
 
@@ -113,17 +114,17 @@ class ShippingController extends Controller
         if (!empty($params_array)) {
 
             $validate = \Validator::make($params_array, [
-                'name' => 'required',
-                'price' => 'required',
-                'description' => 'required',
+                'name'          => 'required',
+                'price'         => 'required',
+                'description'   => 'required',
             ]);
 
             if ($validate->fails()) {
                 $data = [
-                    'code' => 400,
-                    'status' => 'error',
-                    'message' => 'Error, hay campos vacíos.',
-                    'data' => $validate->errors()
+                    'code'      => 400,
+                    'status'    => 'error',
+                    'message'   => 'Error, hay campos vacíos.',
+                    'data'      => $validate->errors()
                 ];
             } else {
 
@@ -132,9 +133,9 @@ class ShippingController extends Controller
                 if ((count($unique) > 0) && (strtoupper($id) != $unique[0]->id)) {
 
                     $data = array(
-                        'code' => 404,
-                        'status' => 'error',
-                        'message' => 'El nombre del tipo de envío ya existe.'
+                        'code'      => 404,
+                        'status'    => 'error',
+                        'message'   => 'El nombre del tipo de envío ya existe.'
                     );
 
                     return response()->json($data, $data['code']);
@@ -153,16 +154,17 @@ class ShippingController extends Controller
                 ]);
 
                 $data = [
-                    'code' => 200,
-                    'status' => 'success',
-                    'data' => $params_array
+                    'code'      => 200,
+                    'status'    => 'success',
+                    'message'   => 'Tipo de envío actualizado correctamente',
+                    'data'      => $params_array
                 ];
             }
         } else {
             $data = [
-                'code' => 400,
-                'status' => 'error',
-                'message' => 'No has ingresado ningún dato.'
+                'code'      => 400,
+                'status'    => 'error',
+                'message'   => 'No has ingresado ningún dato.'
             ];
         }
 
@@ -181,10 +183,10 @@ class ShippingController extends Controller
                 $delete = DB::delete('exec pa_deleteShipping ?', [$id]);
 
                 $data = [
-                    'code' => 200,
-                    'status' => 'success',
-                    'message' => 'Tipo de Envío eliminado correctamente.',
-                    'data'  => $delete,
+                    'code'      => 200,
+                    'status'    => 'success',
+                    'message'   => 'Tipo de Envío eliminado correctamente.',
+                    'data'      => $delete,
                 ];
             } else {
                 $data = [

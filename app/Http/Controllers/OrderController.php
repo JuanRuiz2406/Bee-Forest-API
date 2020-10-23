@@ -25,12 +25,13 @@ class OrderController extends Controller
     //GET ONE
     public function show($id)
     {
-        $order = DB::select('select * from orders where id = ?', [$id]);
+        $order = DB::select('exec pa_selectOrder ?', [$id]);
 
         if (count($order) > 0) {
             $data = [
                 'code'      => 200,
                 'status'    => 'success',
+                'message'   => 'Pedido encontrado correctamente.',
                 'data'      => $order
             ];
         } else {
@@ -151,6 +152,7 @@ class OrderController extends Controller
                 $data = [
                     'code'      => 200,
                     'status'    => 'success',
+                    'message'   => 'Pedido actualizado correctamente.',
                     'data'      => $params_array
                 ];
             }

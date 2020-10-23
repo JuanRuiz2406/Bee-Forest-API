@@ -33,13 +33,14 @@ class MaterialController extends Controller {
             $data = [
                 'code'      => 200,
                 'status'    => 'success',
+                'message'   => 'Material encontrado correctamente.',
                 'data'      => $material
             ];
         } else {
             $data = [
                 'code'      => 400,
                 'status'    => 'error',
-                'message'   => 'Error, el material no existe'
+                'message'   => 'Error, el material no existe.'
             ];
         }
 
@@ -156,6 +157,7 @@ class MaterialController extends Controller {
                 $data = [
                     'code'      => 200,
                     'status'    => 'success',
+                    'message'   => 'Material actualizado correctamente.',
                     'data'      => $params_array
                 ];
             }
