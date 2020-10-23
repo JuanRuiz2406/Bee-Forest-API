@@ -59,6 +59,7 @@ class OrderController extends Controller
                 'ShippingId'        => 'required',
                 'creationDate'      => 'required',
                 'deliveryDate'      => 'required',
+                'discount'          => 'required',
                 'totalPrice'        => 'required',
                 'status'            => 'required',
 
@@ -75,12 +76,13 @@ class OrderController extends Controller
                 $params_array['created_at'] = new \DateTime();
                 $params_array['updated_at'] = new \DateTime();
 
-                DB::insert('exec pa_addOrder ?,?,?,?,?,?,?,?,?', [
+                DB::insert('exec pa_addOrder ?,?,?,?,?,?,?,?,?,?', [
                     $params_array['collaboratorId'],
                     $params_array['clientId'],
                     $params_array['ShippingId'],
                     $params_array['creationDate'],
                     $params_array['deliveryDate'],
+                    $params_array['discount'],
                     $params_array['totalPrice'],
                     $params_array['status'],
                     $params_array['created_at'],
@@ -121,6 +123,7 @@ class OrderController extends Controller
                 'clientId'          => 'required',
                 'ShippingId'        => 'required',
                 'creationDate'      => 'required',
+                'discount'          => 'required',
                 'totalPrice'        => 'required',
                 'status'            => 'required',
             ]);
@@ -139,11 +142,12 @@ class OrderController extends Controller
                 unset($params_array['created_at']);
 
                 $params_array['updated_at'] = new \DateTime();
-                DB::update('exec pa_updateOrder ?,?,?,?,?,?,?', [
+                DB::update('exec pa_updateOrder ?,?,?,?,?,?,?,?', [
                     $params_array['id'],
                     $params_array['collaboratorId'],
                     $params_array['clientId'],
                     $params_array['ShippingId'],
+                    $params_array['discount'],
                     $params_array['totalPrice'],
                     $params_array['status'],
                     $params_array['updated_at']
