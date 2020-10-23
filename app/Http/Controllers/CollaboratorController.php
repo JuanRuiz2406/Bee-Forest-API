@@ -238,7 +238,7 @@ class CollaboratorController extends Controller{
                 $data = [
                     'code'      => 404,
                     'status'    => 'error',
-                    'message'   => 'Colaboradores admin no se pueden eliminar.'
+                    'message'   => 'Colaboradores administradores no se pueden eliminar.'
                 ];
             }
 
