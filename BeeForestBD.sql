@@ -1156,6 +1156,7 @@ CREATE PROCEDURE pa_addClient
 	@updated_at DATETIME
 AS
 BEGIN
+    -- No nulls
     IF NOT EXISTS(SELECT identificationCard, email
                   FROM clients
                   WHERE @identificationCard = @identificationCard OR email = @Email)
@@ -1163,6 +1164,7 @@ BEGIN
 	    VALUES (@id, @identificationCard, @name, @surname, @telephone, @email, @created_at, @updated_at)
     ELSE
 	    SELECT 'Tu cedula o correo ya se encuentran registrados' AS status;
+    -- Msj error nulls
 END
 
 GO
