@@ -83,7 +83,7 @@ CREATE TABLE collaborators(
 	created_at DATETIME NULL,
 	updated_at DATETIME NULL,
 
-	CONSTRAINT collaborators_pk
+    CONSTRAINT collaborators_pk
 	PRIMARY KEY (id)
 )
 
@@ -318,15 +318,92 @@ CREATE TABLE product_refund(
 GO
 
 -- ------------------------------------------------------------------------ --
+--                                AUDITORÍA                                 --
+-- ------------------------------------------------------------------------ --
+
+PRINT 'Creando tablas de Auditoria'
+GO
+
+CREATE TABLE audit_orders(
+	id BIGINT IDENTITY(1,1) NOT NULL,
+	userAudit NVARCHAR(255) NULL,
+	orderId BIGINT NOT NULL,
+	shippingOld BIGINT NULL,
+	shippingNew BIGINT NOT NULL,
+	action NVARCHAR(255) NOT NULL,
+	statusOld NVARCHAR(255) NULL,
+	statusNew NVARCHAR(255) NOT NULL,
+	created_at DATETIME NULL,
+
+	CONSTRAINT audit_orders_pk
+	PRIMARY KEY (id),
+)
+GO
+
+CREATE TABLE audit_collaborators(
+	id BIGINT IDENTITY(1,1) NOT NULL,
+	userAudit NVARCHAR(255) NULL,
+	collaboratorEditedId UNIQUEIDENTIFIER NOT NULL,
+	action NVARCHAR(255) NOT NULL,
+	usernameOld NVARCHAR(255) NULL,
+	usernameNew NVARCHAR(255) NOT NULL,
+	emailOld NVARCHAR(255) NULL,
+	emailNew NVARCHAR(255) NOT NULL,
+	created_at DATETIME NOT NULL,
+
+	CONSTRAINT audit_collaborators_pk
+	PRIMARY KEY (id),
+)
+GO
+
+-- ------------------------------------------------------------------------ --
 --                   CREACION DE USUARIO ADMINISTRADOR                      --
 -- ------------------------------------------------------------------------ --
 
-PRINT 'Creando usuario administrador'
+PRINT 'Creando usuario administrador en la tabla Colaboradores'
 GO
 
 INSERT INTO collaborators VALUES
 	('FF605560-E5BC-11EA-8530-EF0B356FE153','admin','FF605560-E5BC-11EA-8530-EF0B356FE153','admin@admin.com','admin',
 	'2020-08-23 21:50:48.970','2020-08-23 21:50:48.970')
+
+-- ------------------------------------------------------------------------ --
+--                      CREACION DE USUARIOS DE LA BD                       --
+-- ------------------------------------------------------------------------ --
+
+PRINT 'Creando usuarios de la BD'
+GO
+
+SP_ADDLOGIN 'BeeAdmin', 'BeeAdmin', 'master'
+GO
+
+SP_ADDUSER 'BeeAdmin', 'BeeAdmin'
+GO
+
+-- Permisos
+SP_ADDSRVROLEMEMBER 'BeeAdmin', 'sysadmin'
+GO
+
+/*
+-- Permisos 1 por 1
+GRANT SELECT, INSERT, UPDATE, DELETE ON audit_collaborators to BeeAdmin
+GRANT SELECT, INSERT, UPDATE, DELETE ON audit_orders to BeeAdmin
+GRANT SELECT, INSERT, UPDATE, DELETE ON categories to BeeAdmin
+GRANT SELECT, INSERT, UPDATE, DELETE ON clients to BeeAdmin
+GRANT SELECT, INSERT, UPDATE, DELETE ON collaborators to BeeAdmin
+GRANT SELECT, INSERT, UPDATE, DELETE ON directions to BeeAdmin
+GRANT SELECT, INSERT, UPDATE, DELETE ON dispatch_tickets to BeeAdmin
+GRANT SELECT, INSERT, UPDATE, DELETE ON materials to BeeAdmin
+GRANT SELECT, INSERT, UPDATE, DELETE ON orders to BeeAdmin
+GRANT SELECT, INSERT, UPDATE, DELETE ON product_material to BeeAdmin
+GRANT SELECT, INSERT, UPDATE, DELETE ON product_order to BeeAdmin
+GRANT SELECT, INSERT, UPDATE, DELETE ON product_refund to BeeAdmin
+GRANT SELECT, INSERT, UPDATE, DELETE ON products to BeeAdmin
+GRANT SELECT, INSERT, UPDATE, DELETE ON providers to BeeAdmin
+GRANT SELECT, INSERT, UPDATE, DELETE ON refunds to BeeAdmin
+GRANT SELECT, INSERT, UPDATE, DELETE ON shippings to BeeAdmin
+GO
+*/
 
 -- ------------------------------------------------------------------------ --
 --                           CREACION DE VISTAS                             --
@@ -455,7 +532,7 @@ BEGIN
         IS NULL OR @email IS NULL OR @startDay IS NULL OR @finalDay IS NULL OR @StartTime
         IS NULL OR @finalTime IS NULL OR @created_at IS NULL OR @updated_at IS NULL)
         SELECT 'Error, hay dato(s) vacíos' AS status;
-    
+
     ELSE
         -- Validación ID o Email ya existentes
         IF NOT EXISTS(SELECT id, identificationCard, email
@@ -535,7 +612,7 @@ BEGIN
         IS NULL OR @email IS NULL OR @startDay IS NULL OR @finalDay IS NULL OR @StartTime
         IS NULL OR @finalTime IS NULL OR @updated_at IS NULL)
         SELECT 'Error, hay dato(s) vacíos' AS status;
-    
+
     ELSE
         -- Validación ID no existe
         IF NOT EXISTS(SELECT id
@@ -583,8 +660,21 @@ CREATE PROCEDURE pa_addMaterial
 	@updated_at DATETIME
 AS
 BEGIN
-	INSERT INTO materials (providerId, name, price, amount, description, image, created_at, updated_at)
-	VALUES (@providerId, @name, @price, 0, @description,'No image', @created_at, @updated_at)
+	-- Validación nulos
+    IF (@providerId IS NULL OR @name IS NULL OR @price IS NULL OR @description IS NULL OR @created_at
+        IS NULL OR @updated_at IS NULL)
+        SELECT 'Error, hay dato(s) vacíos' AS status;
+
+    ELSE
+        -- Validación Proveedor existe
+        IF EXISTS(SELECT id
+                  FROM providers
+                  WHERE id = @providerId)
+            -- Insertar
+	        INSERT INTO materials (providerId, name, price, amount, description, image, created_at, updated_at)
+	        VALUES (@providerId, @name, @price, 0, @description,'No image', @created_at, @updated_at)
+        ELSE
+	        SELECT 'El ID del Proveedor no existe' AS status;
 END
 
 GO
@@ -721,8 +811,21 @@ CREATE PROCEDURE pa_addProduct
 	@updated_at DATETIME
 AS
 BEGIN
-	INSERT INTO products (categoryId, name, price, amount, description, image, created_at, updated_at)
-	VALUES (@categoryId, @name, @price, 0, @description, @image, @created_at, @updated_at)
+    -- Validación nulos
+    IF (@categoryId IS NULL OR @name IS NULL OR @price IS NULL OR @description IS NULL OR @image
+        IS NULL OR @created_at IS NULL OR @updated_at IS NULL)
+        SELECT 'Error, hay dato(s) vacíos' AS status;
+
+    ELSE
+        -- Validación Categoria existe
+        IF EXISTS(SELECT id
+                  FROM categories
+                  WHERE id = @categoryId)
+            -- Insertar
+	        INSERT INTO products (categoryId, name, price, amount, description, image, created_at, updated_at)
+	        VALUES (@categoryId, @name, @price, 0, @description, @image, @created_at, @updated_at)
+        ELSE
+	        SELECT 'El ID de la Categoria no existe' AS status;
 END
 
 GO
@@ -857,8 +960,14 @@ CREATE PROCEDURE pa_addCategory
 	@updated_at DATETIME
 AS
 BEGIN
-	INSERT INTO categories(name, description, created_at, updated_at)
-	VALUES (@name, @description, @created_at, @updated_at)
+    -- Validación nulos
+    IF (@name IS NULL OR @description IS NULL OR @description IS NULL OR @created_at IS NULL OR @updated_at IS NULL)
+        SELECT 'Error, hay dato(s) vacíos' AS status;
+
+    ELSE
+        -- Insertar
+	    INSERT INTO categories(name, description, created_at, updated_at)
+	    VALUES (@name, @description, @created_at, @updated_at)
 END
 
 GO
@@ -949,8 +1058,30 @@ CREATE PROCEDURE pa_addOrder
 	@updated_at DATETIME
 AS
 BEGIN
-	INSERT INTO orders (collaboratorId, clientId, ShippingId, creationDate, deliveryDate, discount, totalPrice, status, created_at, updated_at)
-	VALUES (@collaboratorId, @clientId, @ShippingId, @creationDate, @deliveryDate, @discount, @totalPrice, @status, @created_at, @updated_at)
+    -- Validación nulos
+    IF (@collaboratorId IS NULL OR @clientId IS NULL OR @ShippingId IS NULL OR @creationDate IS NULL OR @deliveryDate
+        IS NULL OR @discount IS NULL OR @totalPrice IS NULL OR @status IS NULL OR @created_at
+        IS NULL OR @updated_at IS NULL)
+        SELECT 'Error, hay dato(s) vacíos' AS status;
+
+    ELSE
+        -- Validación Colaborador existe
+        IF (EXISTS(SELECT id
+                  FROM collaborators
+                  WHERE id = @collaboratorId)
+            AND
+            EXISTS(SELECT id
+                  FROM clients
+                  WHERE id = @clientId)
+            AND
+            EXISTS(SELECT id
+                  FROM shippings
+                  WHERE id = @ShippingId))
+            -- Insertar
+	        INSERT INTO orders (collaboratorId, clientId, ShippingId, creationDate, deliveryDate, discount, totalPrice, status, created_at, updated_at)
+	        VALUES (@collaboratorId, @clientId, @ShippingId, @creationDate, @deliveryDate, @discount, @totalPrice, @status, @created_at, @updated_at)
+        ELSE
+	        SELECT 'El ID del Colaborador, Cliente o Tipo de Envio no existe' AS status;
 END
 
 GO
@@ -1029,8 +1160,20 @@ CREATE PROCEDURE pa_addRefund
 	@updated_at DATETIME
 AS
 BEGIN
-	INSERT INTO refunds (refundDate, orderId, created_at, updated_at)
-	VALUES (@refundDate, @orderId, @created_at, @updated_at)
+    -- Validación nulos
+    IF (@refundDate IS NULL OR @orderId IS NULL OR @created_at IS NULL OR @updated_at IS NULL)
+        SELECT 'Error, hay dato(s) vacíos' AS status;
+
+    ELSE
+        -- Validación Categoria existe
+        IF EXISTS(SELECT id
+                  FROM orders
+                  WHERE id = @orderId)
+            -- Insertar
+	        INSERT INTO refunds (refundDate, orderId, created_at, updated_at)
+	        VALUES (@refundDate, @orderId, @created_at, @updated_at)
+        ELSE
+	        SELECT 'El ID del Pedido no existe' AS status;
 END
 
 GO
@@ -1107,8 +1250,21 @@ CREATE PROCEDURE pa_addCollaborator
 	@updated_at DATETIME
 AS
 BEGIN
-	INSERT INTO collaborators (id, username, password, email, role, created_at, updated_at)
-	VALUES (@id, @username, @password, @email, @role, @created_at, @updated_at)
+    -- Validación nulos
+    IF (@id IS NULL OR @username IS NULL OR @password IS NULL OR @email IS NULL OR @role
+        IS NULL OR @created_at IS NULL OR @updated_at IS NULL)
+        SELECT 'Error, hay dato(s) vacíos' AS status;
+
+    ELSE
+        -- Validación ID, username o Email ya existentes
+        IF NOT EXISTS(SELECT id, username, email
+                      FROM collaborators
+                      WHERE id = @id OR username = @username OR email = @email)
+            -- Insertar
+	        INSERT INTO collaborators (id, username, password, email, role, created_at, updated_at)
+	        VALUES (@id, @username, @password, @email, @role, @created_at, @updated_at)
+        ELSE
+	        SELECT 'El ID, nombre de usuario o correo electrónico ya se encuentran registrados' AS status;
 END
 
 GO
@@ -1215,8 +1371,20 @@ CREATE PROCEDURE pa_addShipping
 	@updated_at DATETIME
 AS
 BEGIN
-	INSERT INTO shippings (name, price, description, created_at, updated_at)
-	VALUES (@name, @price, @description, @created_at, @updated_at)
+    -- Validación nulos
+    IF (@name IS NULL OR @price IS NULL OR @description IS NULL OR @created_at IS NULL OR @updated_at IS NULL)
+        SELECT 'Error, hay dato(s) vacíos' AS status;
+
+    ELSE
+        -- Validación name ya existente
+        IF NOT EXISTS(SELECT name
+                      FROM shippings
+                      WHERE name = @name)
+            -- Insertar
+	        INSERT INTO shippings (name, price, description, created_at, updated_at)
+	        VALUES (@name, @price, @description, @created_at, @updated_at)
+        ELSE
+	        SELECT 'El Nombre ya se encuentra registrado' AS status;
 END
 
 GO
@@ -1316,7 +1484,7 @@ BEGIN
     IF (@id IS NULL OR @identificationCard IS NULL OR @name IS NULL OR  @surname IS NULL OR @telephone
         IS NULL OR @email IS NULL OR @created_at  IS NULL OR @updated_at IS NULL)
         SELECT 'Error, hay dato(s) vacíos' AS status;
-    
+
     ELSE
         -- Validación ID, Cédula o Email ya existentes
         IF NOT EXISTS(SELECT id, identificationCard, email
@@ -1408,8 +1576,22 @@ CREATE PROCEDURE pa_addDirection
 	@updated_at DATETIME
 AS
 BEGIN
-	INSERT INTO directions (clientId, country, province, city, zipCode, direction, created_at, updated_at)
-	VALUES (@clientId, @country, @province, @city, @zipCode, @direction, @created_at, @updated_at)
+    -- Validación nulos
+    IF (@clientId IS NULL OR @country IS NULL OR @province IS NULL OR @city IS NULL OR @zipCode IS NULL OR @direction
+        IS NULL OR @created_at IS NULL OR @updated_at IS NULL)
+        SELECT 'Error, hay dato(s) vacíos' AS status;
+
+    ELSE
+        -- Validación cliente existe
+        IF EXISTS(SELECT id
+                  FROM clients
+                  WHERE id = @clientId)
+            -- Insertar
+	        INSERT INTO directions (clientId, country, province, city, zipCode, direction, created_at, updated_at)
+	        VALUES (@clientId, @country, @province, @city, @zipCode, @direction, @created_at, @updated_at)
+        ELSE
+	        SELECT 'El ID del Cliente no existe' AS status;
+
 END
 
 GO
@@ -1488,7 +1670,7 @@ GO
 PRINT 'Creando funcion de productos ordenados por categoria'
 GO
 
-CREATE function f_ProductsByCategory (@categoria INT)
+CREATE FUNCTION f_ProductsByCategory (@categoria INT)
 	RETURNS @products TABLE(
 	id BIGINT,
 	nombre VARCHAR(255),
@@ -1826,3 +2008,82 @@ GO
 -- SI AMOUNT(product_refund) ES <= A AMOUNT(product_refund) INSERTAR
 -- ELSE CANCEL
 
+PRINT 'Triggers de Auditoria - Pedidos'
+GO
+
+CREATE TRIGGER Audit_insert_orders
+ON orders
+FOR INSERT
+AS
+    DECLARE @userAudit BIGINT, @orderId BIGINT, @shippingNew BIGINT,
+    @action NVARCHAR(255), @statusNew NVARCHAR(255), @created_at DATETIME
+
+    SELECT @orderId = id, @shippingNew = ShippingId,
+    @statusNew = status, @created_at = created_at FROM inserted
+    SET @userAudit = (SELECT system_user)
+    SET @action = 'Insertar'
+
+    INSERT INTO audit_orders(userAudit, orderId, shippingNew, action, statusNew, created_at)
+    VALUES (@userAudit, @orderId, @shippingNew, @action, @statusNew, @created_at)
+GO
+
+CREATE TRIGGER Audit_update_orders
+ON orders
+FOR UPDATE
+AS
+    DECLARE @userAudit BIGINT, @orderId BIGINT, @shippingOld BIGINT, @shippingNew BIGINT,
+    @action NVARCHAR(255), @statusOld NVARCHAR(255), @statusNew NVARCHAR(255), @created_at DATETIME
+
+    SELECT @orderId = id, @shippingNew = ShippingId,
+    @statusNew = status, @created_at = created_at FROM inserted
+
+    SELECT @shippingOld = ShippingId, @statusOld = status FROM deleted
+
+    SET @userAudit = (SELECT system_user)
+    SET @action = 'Actualizar'
+
+    INSERT INTO audit_orders(userAudit, orderId, shippingOld, shippingNew, action, statusOld, statusNew, created_at)
+    VALUES (@userAudit, @orderId, @shippingOld, @shippingNew, @action, @statusOld, @statusNew, @created_at)
+GO
+
+PRINT 'Triggers de Auditoria - Colaboradores'
+GO
+
+CREATE TRIGGER Audit_insert_collaborators
+ON collaborators
+FOR INSERT
+AS
+    DECLARE @userAudit BIGINT, @collaboratorEditedId UNIQUEIDENTIFIER,
+    @action NVARCHAR(255), @usernameNew NVARCHAR(255),
+    @emailNew NVARCHAR(255), @created_at DATETIME
+
+    SELECT @collaboratorEditedId = id, @usernameNew = username,
+    @emailNew = email, @created_at = created_at FROM inserted
+    SET @userAudit = (SELECT system_user)
+    SET @action = 'Insertar'
+
+    INSERT INTO audit_collaborators(userAudit, collaboratorEditedId, action, usernameNew, emailNew, created_at)
+    VALUES (@userAudit, @collaboratorEditedId, @action, @usernameNew, @emailNew, @created_at)
+GO
+
+CREATE TRIGGER Audit_update_collaborators
+ON collaborators
+FOR UPDATE
+AS
+    DECLARE @userAudit BIGINT, @collaboratorEditedId UNIQUEIDENTIFIER,
+    @action NVARCHAR(255), @usernameOld NVARCHAR(255),
+	@usernameNew NVARCHAR(255),	@emailOld NVARCHAR(255),
+    @emailNew NVARCHAR(255), @created_at DATETIME
+
+    SELECT @collaboratorEditedId = id, @collaboratorEditedId = id,
+    @emailNew = email, @created_at = created_at FROM inserted
+
+    SELECT @usernameOld = username, @emailOld = email FROM deleted
+
+    SET @userAudit = (SELECT system_user)
+    SET @action = 'Actualizar'
+
+    INSERT INTO audit_collaborators(userAudit, collaboratorEditedId, action, usernameOld, usernameNew,
+    emailOld, emailNew, created_at)
+    VALUES (@userAudit, @collaboratorEditedId, @action, @usernameOld, @usernameNew, @emailOld, @emailNew, @created_at)
+GO
