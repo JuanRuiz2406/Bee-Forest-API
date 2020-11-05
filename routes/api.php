@@ -36,6 +36,9 @@ Route::delete('collaborator/delete/{id}',  [CollaboratorController::class, 'dest
 Route::get('collaborator/detail/{id}', [CollaboratorController::class, 'detail'])->middleware(ApiAuthMiddleware::class);
 
 Route::resource('product', ProductController::class); //CRUD
+Route::post('product/upload/{id}' , [ProductController::class, 'upload']);
+Route::get('product/image/{filename}', [ProductController::class, 'getImage']);
+
 Route::resource('client', ClientController::class); //CRUD
 Route::resource('provider', ProviderController::class); //CRUD
 Route::resource('material', MaterialController::class);

@@ -11,7 +11,7 @@ use App\Helpers\JwtAuth;
 class ProductController extends Controller
 {
 
-    public function __construct(){ $this->middleware('api.auth'); }
+    public function __construct(){ $this->middleware('api.auth',['except' => ['getImage']]); }
 
     //GET ALL
     public function index()
@@ -258,6 +258,60 @@ class ProductController extends Controller
             ];
         }
 
+        return response()->json($data, $data['code']);
+    }
+
+    public function upload(Request $request, $id){
+        // Recoger la imagen de la petición
+        $image = $request->file('file0');
+        
+        // Validar imagen
+        $validate = \Validator::make($request->all(), [
+           'file0' => 'required|image|mimes:jpg,jpeg,png,gif' 
+        ]);
+    
+        // Guardar la imagen
+        if(!$image || $validate->fails()){
+            $data = [
+                'code' => 400,
+                'status' => 'error',
+                'message' => 'Error al subir la imagen'
+            ];
+        }else{
+            $image_name = time().$image->getClientOriginalName();
+            
+            \Storage::disk('products')->put($image_name, \File::get($image));
+        
+            DB::update('UPDATE products SET image = ? WHERE id = ? ', [$image_name, $id]);
+            $data = [
+                'code' => 200,
+                'status' => 'success',
+                'image' => $image_name
+            ];
+        }
+        
+        // Devolver datos
+        return response()->json($data, $data['code']);
+    }
+    
+    public function getImage($filename){
+        // Comprobar si existe el fichero
+        $isset = \Storage::disk('products')->exists($filename);
+        
+        if($isset){
+            // Conseguir la imagen
+            $file = \Storage::disk('products')->get($filename);
+            
+            // Devolver la imagen
+            return new Response($file, 200);
+        }else{
+            $data = [
+                'code' => 404,
+                'status' => 'error',
+                'message' => 'La imagen no existe'
+            ];
+        }
+        
         return response()->json($data, $data['code']);
     }
 }
