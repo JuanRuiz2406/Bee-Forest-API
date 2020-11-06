@@ -2053,7 +2053,7 @@ CREATE TRIGGER Audit_insert_collaborators
 ON collaborators
 FOR INSERT
 AS
-    DECLARE @userAudit BIGINT, @collaboratorEditedId UNIQUEIDENTIFIER,
+    DECLARE @userAudit NVARCHAR(50), @collaboratorEditedId UNIQUEIDENTIFIER,
     @action NVARCHAR(255), @usernameNew NVARCHAR(255),
     @emailNew NVARCHAR(255), @created_at DATETIME
 
@@ -2070,7 +2070,7 @@ CREATE TRIGGER Audit_update_collaborators
 ON collaborators
 FOR UPDATE
 AS
-    DECLARE @userAudit BIGINT, @collaboratorEditedId UNIQUEIDENTIFIER,
+    DECLARE @userAudit NVARCHAR(50), @collaboratorEditedId UNIQUEIDENTIFIER,
     @action NVARCHAR(255), @usernameOld NVARCHAR(255),
 	@usernameNew NVARCHAR(255),	@emailOld NVARCHAR(255),
     @emailNew NVARCHAR(255), @created_at DATETIME
