@@ -384,27 +384,6 @@ GO
 SP_ADDSRVROLEMEMBER 'BeeAdmin', 'sysadmin'
 GO
 
-/*
--- Permisos 1 por 1
-GRANT SELECT, INSERT, UPDATE, DELETE ON audit_collaborators to BeeAdmin
-GRANT SELECT, INSERT, UPDATE, DELETE ON audit_orders to BeeAdmin
-GRANT SELECT, INSERT, UPDATE, DELETE ON categories to BeeAdmin
-GRANT SELECT, INSERT, UPDATE, DELETE ON clients to BeeAdmin
-GRANT SELECT, INSERT, UPDATE, DELETE ON collaborators to BeeAdmin
-GRANT SELECT, INSERT, UPDATE, DELETE ON directions to BeeAdmin
-GRANT SELECT, INSERT, UPDATE, DELETE ON dispatch_tickets to BeeAdmin
-GRANT SELECT, INSERT, UPDATE, DELETE ON materials to BeeAdmin
-GRANT SELECT, INSERT, UPDATE, DELETE ON orders to BeeAdmin
-GRANT SELECT, INSERT, UPDATE, DELETE ON product_material to BeeAdmin
-GRANT SELECT, INSERT, UPDATE, DELETE ON product_order to BeeAdmin
-GRANT SELECT, INSERT, UPDATE, DELETE ON product_refund to BeeAdmin
-GRANT SELECT, INSERT, UPDATE, DELETE ON products to BeeAdmin
-GRANT SELECT, INSERT, UPDATE, DELETE ON providers to BeeAdmin
-GRANT SELECT, INSERT, UPDATE, DELETE ON refunds to BeeAdmin
-GRANT SELECT, INSERT, UPDATE, DELETE ON shippings to BeeAdmin
-GO
-*/
-
 -- ------------------------------------------------------------------------ --
 --                           CREACION DE VISTAS                             --
 -- ------------------------------------------------------------------------ --
@@ -1928,6 +1907,8 @@ END
 
 GO
 
+
+/*
 PRINT 'Creando Trigger de resta de productos al realizar ordenes'
 GO
 
@@ -2000,8 +1981,79 @@ GO
 PRINT 'Creando Trigger de suma de productos al realizar devoluciones'
 GO
 
+*/
 -- Sumar productos al insertar devolucion
--- dis_refundInsert
+-- CREO QUE EL TRIGGER DE PRODUCT ORDERS ESTÁ MALO, REVISAR CON LAS PRUEBAS ANTES DE HACER ESTE
+-- DEBEN SALTAR EN LA TABLA INTERMEDIA, NO EN LA TABLA PEDIDOS / DEVOLUCIONES
+/*
+CREATE TRIGGER dis_refundInsert
+ON product_refund
+FOR INSERT
+AS
+BEGIN
+	DECLARE @refundId BIGINT, @productId BIGINT, @orderId BIGINT, @amount INT, @fail int,
+            @productName NVARCHAR(255), @productAmount INT, @actualAmount INT, @lessAmount INT
+
+    SELECT @refundId = refundId, @amount = amount FROM inserted
+    SELECT @orderId = (SELECT orderId FROM refunds WHERE id = @refundId)
+
+    BEGIN TRANSACTION;
+
+    DECLARE cRefund CURSOR FOR
+    -- Consulta productos que se relacionan con la orden a realizar
+    SELECT productId, amount
+    FROM product_order
+    WHERE orderId = @orderId
+
+    -- Cursor
+	OPEN cRefund
+    FETCH cRefund INTO @productId, @productOrderAmount
+    WHILE(@@FETCH_STATUS = 0)
+    BEGIN
+
+        -- Monto Productos y Monto a Restar
+        SET @actualAmount = (SELECT amount FROM products WHERE id = @productId)
+        SET @lessAmount = @amount * @productAmount
+
+        -- Si lo que devuelvo es menor o igual a lo que se vendió,
+        -- ejecuto el P.A. para aumentar productos
+        IF(@actualAmount >= @lessAmount)
+        BEGIN
+            EXEC pa_updateLessAmountProduct @productId, @lessAmount, @updated_at
+        END
+        -- Si en algún momento no es suficiente, saco el nombre del producto,
+        -- y vamos al CANCEL
+        ELSE
+        BEGIN
+            SET @productName = (SELECT name FROM products WHERE id = @productId)
+			SELECT @fail = 1;
+            GOTO CANCEL
+        END
+
+        FETCH cRefund INTO @productId, @productAmount
+    END
+
+    -- En caso de que todo sucediera correctamente, liberar memoria y COMMIT
+    CLOSE cRefund
+    DEALLOCATE cRefund
+    COMMIT TRANSACTION;
+	SELECT @fail = 0;
+
+    -- En caso de redirigir aquí, Mostramos material insuficiente y Rollback
+	-- fail es para que no entre en caso de éxito
+    CANCEL:
+	IF (@fail = 1)
+	BEGIN
+		SELECT 'No tenemos *' + @productName + '* suficientes para crear la orden' AS status;
+		CLOSE cOrder
+		DEALLOCATE cOrder
+		ROLLBACK TRANSACTION;
+	END
+END
+
+GO
+*/
+
 
 -- ESTE TRIGGER DEBERIA SER EN product_refund, EN CADA INSERCION QUE VALIDE SI EL AMOUNT ES VALIDO
 -- CONSULTA: EMPEZANDO DESDE refund (ID) JOIN orders (ORDERID) JOIN product_order (SACAR AMOUNT Y PRODUCTID)
