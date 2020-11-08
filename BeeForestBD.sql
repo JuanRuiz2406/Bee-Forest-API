@@ -1788,11 +1788,12 @@ END
 
 GO
 
+/*
 PRINT 'Creando Trigger de no borrado de productos con ordenes relacionadas'
 GO
 
 -- No borrar productos que tengan relaciones con ventas
-CREATE TRIGGER dis_deleteProductRelation
+drop TRIGGER dis_deleteProductRelation
 ON products
 INSTEAD OF DELETE
 AS
@@ -1812,6 +1813,7 @@ BEGIN
 END
 
 GO
+*/
 
 PRINT 'Creando Trigger de no borrado de materiales con productos relacionados'
 GO
