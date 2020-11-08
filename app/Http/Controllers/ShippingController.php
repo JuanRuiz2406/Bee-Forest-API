@@ -12,10 +12,7 @@ use Uuid;
 
 class ShippingController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware('api.auth');
-    }
+    public function __construct(){ $this->middleware('api.auth'); }
 
     //GET ALL
     public function index()
