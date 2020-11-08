@@ -156,7 +156,7 @@ class ProductController extends Controller
     }
 
     //UPDATE
-    public function update($id, Request $request)
+    public function update(Request $request, $id)
     {
         $json = $request->input('json', null);
         $params = json_decode($json);
@@ -166,7 +166,7 @@ class ProductController extends Controller
 
             $validate = \Validator::make($params_array, [
                 'categoryId'    => 'required',
-                'name'          => 'required',
+                'name'          => 'required|unique:products,name,'.$id,
                 'price'         => 'required',
                 'amount'        => 'required',
             ]);
@@ -179,19 +179,6 @@ class ProductController extends Controller
                     'data'      => $validate->errors()
                 ];
             } else {
-
-                $unique = DB::select('exec pa_selectProductByName ?', [$params->name]);
-
-                if ((count($unique) > 0) && (strtoupper($id) != $unique[0]->id)) {
-
-                    $data = array(
-                        'code'      => 404,
-                        'status'    => 'error',
-                        'message'   => 'El el nombre del producto ya existe.'
-                    );
-
-                    return response()->json($data, $data['code']);
-                }
 
                 unset($params_array['id']);
                 unset($params_array['created_at']);
