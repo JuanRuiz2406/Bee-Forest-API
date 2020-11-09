@@ -25,9 +25,9 @@ class MaterialController extends Controller {
     }
 
     //GET ONE
-    public function show($id){
+    public function show($name){
 
-        $material = DB::select('exec pa_selectMaterial ?', [$id]);
+        $material = DB::select('select * from materials where name = ?', [$name]);
 
         if (count($material) > 0) {
             $data = [
@@ -38,7 +38,7 @@ class MaterialController extends Controller {
             ];
         } else {
             $data = [
-                'code'      => 400,
+                'code'      => 404,
                 'status'    => 'error',
                 'message'   => 'Error, el material no existe.'
             ];
@@ -105,7 +105,7 @@ class MaterialController extends Controller {
     }
 
     //UPDATE
-    public function update($id, Request $request){
+    public function update(Request $request, $id){
 
         $json = $request->input('json', null);
         $params = json_decode($json);
@@ -115,7 +115,7 @@ class MaterialController extends Controller {
 
             $validate = \Validator::make($params_array, [
                 'providerId'    => 'required',
-                'name'          => 'required',
+                'name'          => 'required|unique:materials,name,'.$id,
                 'price'         => 'required',
                 'amount'        => 'required'
             ]);
@@ -129,18 +129,7 @@ class MaterialController extends Controller {
                 ];
             } else {
 
-                $unique = DB::select('exec pa_selectMaterialByName ?', [$params->name]);
-
-                if ((count($unique) > 0) && (strtoupper($id) != $unique[0]->id)) {
-
-                    $data = array(
-                        'code'      => 404,
-                        'status'    => 'error',
-                        'message'   => 'El el nombre del material ya existe'
-                    );
-                    return response()->json($data, $data['code']);
-                }
-
+                
                 unset($params_array['created_at']);
                 $params_array['updated_at'] = new \DateTime();
 

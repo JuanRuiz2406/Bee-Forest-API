@@ -179,31 +179,68 @@ class ProductController extends Controller
                     'data'      => $validate->errors()
                 ];
             } else {
+                    //recorrmos el array de materials (todos los materiales para crear un producto)
+                    foreach ($params_array['materials'] as $key => $value) {
 
-                unset($params_array['id']);
-                unset($params_array['created_at']);
-                $params_array['updated_at'] = new \DateTime();
+                        //Por cada vuelta buscar por id en materiales
+                        $material = DB::select('exec pa_selectMaterial ?',  [$value['materialId']]);
 
-                DB::update('exec pa_updateProduct ?,?,?,?,?,?,?', [
-                    $id,
-                    $params_array['categoryId'],
-                    $params_array['name'],
-                    $params_array['price'],
-                    $params_array['amount'],
-                    $params_array['description'],
-                    $params_array['updated_at']
-                ]);
+                        //cantidad de materiales - cantidad de productos por cantidad de materiales da negativo
+                        if(($material[0]->amount - ($params_array['amount'] * $value['materialAmount'])) >= 0){
 
-                $data = [
-                    'code'      => 200,
-                    'status'    => 'success',
-                    'message'   => 'Producto actualizado correctamente.',
-                    'data'      => $params_array
-                ];
+                            //Insertamos en la tabla intermedia
+                            DB::insert('insert into product_material (productId, materialId, amount, created_at, updated_at) values (?,?,?,?,?)', [
+                                $id,
+                                $value['id'],
+                                $value['materialAmount'],
+                                new \DateTime(),
+                                new \DateTime()
+                            ]);
+                       
+                            //Hacemos el update de la nueva contidad en meterilas
+                            DB::insert('update materials set amount = ? where id = ?', [
+                                $material[0]->amount - ($params_array['amount']  * $value['materialAmount']),
+                                $value['materialId'],
+                            ]);
+                        }else{
+
+                            $data = [
+                                'code' => 200,
+                                'status' => 'error',
+                                'message' => 'La cantidad de materiales para crear el producto no es suficiente'
+                            ];
+
+                            return response()->json($data, $data['code']);
+
+                        }
+
+                    }
+
+                            unset($params_array['id']);
+                            unset($params_array['created_at']);
+                            $params_array['updated_at'] = new \DateTime();
+
+
+                            DB::update('exec pa_updateProduct ?,?,?,?,?,?,?', [
+                                $id,
+                                $params_array['categoryId'],
+                                $params_array['name'],
+                                $params_array['price'],
+                                $params_array['amount'],
+                                $params_array['description'],
+                                $params_array['updated_at']
+                            ]);
+
+                            $data = [
+                                'code'      => 200,
+                                'status'    => 'success',
+                                'message'   => 'Producto actualizado correctamente.',
+                                'data'      => $params_array
+                            ];
             }
         } else {
             $data = [
-                'code'      => 400,
+                'code'      => 200,
                 'status'    => 'error',
                 'message'   => 'No has ingresado ningún dato.'
             ];
@@ -280,7 +317,20 @@ class ProductController extends Controller
         // Devolver datos
         return response()->json($data, $data['code']);
     }
-    
+
+    public function getMaterialByProduct($id){
+
+        $materials = DB::select('SELECT  materials.id, materials.name, product_material.amount FROM product_material
+        INNER JOIN materials ON  materials.id = product_material.materialId
+        WHERE  product_material.productId =?', [$id]);
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $materials
+        ], 200);
+
+    }
+
     public function getImage($filename){
         // Comprobar si existe el fichero
         $isset = \Storage::disk('products')->exists($filename);
