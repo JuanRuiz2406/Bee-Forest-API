@@ -1416,7 +1416,6 @@ CREATE PROCEDURE pa_updateShipping
 	@name NVARCHAR(255),
 	@price FLOAT,
 	@description NVARCHAR(255),
-	@created_at DATETIME,
 	@updated_at DATETIME
 AS
 BEGIN

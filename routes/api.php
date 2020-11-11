@@ -37,14 +37,14 @@ Route::get('collaborator/detail/{id}', [CollaboratorController::class, 'detail']
 
 Route::resource('product', ProductController::class); //CRUD
 Route::get('product/get-material/{id}', [ProductController::class, 'getMaterialByProduct']); //CRUD
-Route::post('product/upload/{id}' , [ProductController::class, 'upload']);
+Route::post('product/upload/{id}', [ProductController::class, 'upload']);
 Route::get('product/image/{filename}', [ProductController::class, 'getImage']);
 
 Route::resource('client', ClientController::class); //CRUD
 Route::resource('provider', ProviderController::class); //CRUD
 Route::resource('material', MaterialController::class);
 Route::resource('category', CategoryController::class);
-Route::resource('shipping', ShippingControllr::class);
+Route::resource('shipping', ShippingController::class);
 Route::resource('order', OrderController::class);
 
 //Rutas de Direcicones
