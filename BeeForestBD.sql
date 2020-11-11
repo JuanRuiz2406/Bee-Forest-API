@@ -1576,6 +1576,15 @@ GO
 
 -- READ
 CREATE PROCEDURE pa_readDirections
+AS
+BEGIN
+	SELECT * FROM directions
+END
+
+GO
+
+-- SELECT BY CLIENT ID
+CREATE PROCEDURE pa_selectDirectionByClient
 	@clientId UNIQUEIDENTIFIER
 AS
 BEGIN
