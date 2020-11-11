@@ -1019,7 +1019,6 @@ END
 
 GO
 
-
 PRINT 'Creando procedimientos almacenados CRUD para la tabla Orders'
 GO
 
@@ -1783,6 +1782,9 @@ BEGIN
 		RAISERROR('Error... No se puede borrar una categoria que tenga productos asociados', 16, 1)
 		ROLLBACK TRANSACTION
 	END
+
+    ELSE
+        DELETE FROM categories WHERE id = @ID
 
 END
 
