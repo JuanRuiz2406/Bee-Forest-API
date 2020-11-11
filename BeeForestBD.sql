@@ -514,8 +514,8 @@ BEGIN
 
     ELSE
         -- Validación ID o Email ya existentes
-        IF NOT EXISTS(SELECT id, identificationCard, email
-                      FROM clients
+        IF NOT EXISTS(SELECT id, email
+                      FROM providers
                       WHERE id = @id OR email = @email)
             -- Insertar
 	        INSERT INTO providers (id,name,surname,telephone,direction,email,startDay,
@@ -544,7 +544,7 @@ AS
 BEGIN
 	-- Validación ID existe
     IF NOT EXISTS(SELECT id
-                  FROM clients
+                  FROM providers
                   WHERE email = @email)
             SELECT 'El Correo Electrónico del Proveedor no existe' AS status;
         -- Actualizar
@@ -561,7 +561,7 @@ AS
 BEGIN
 	-- Validación ID existe
     IF NOT EXISTS(SELECT id
-                  FROM clients
+                  FROM providers
                   WHERE id = @id)
             SELECT 'El ID del Proveedor no existe' AS status;
         -- Select
@@ -595,7 +595,7 @@ BEGIN
     ELSE
         -- Validación ID no existe
         IF NOT EXISTS(SELECT id
-                      FROM clients
+                      FROM providers
                       WHERE id = @id)
             SELECT 'El ID del Proveedor no existe' AS status;
         -- Actualizar

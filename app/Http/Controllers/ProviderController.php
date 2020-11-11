@@ -156,7 +156,7 @@ class ProviderController extends Controller {
                 'surname'   => 'required',
                 'telephone' => 'required',
                 'direction' => 'required',
-                'email'     => 'required|email|',
+                'email'     => 'required|email',
                 'startDay'  => 'required',
                 'finalDay'  => 'required',
                 'StartTime' => 'required',
