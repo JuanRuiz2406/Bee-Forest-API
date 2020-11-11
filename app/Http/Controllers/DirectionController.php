@@ -12,9 +12,9 @@ class DirectionController extends Controller {
     public function __construct() { $this->middleware('api.auth'); }
 
     //GET ALL
-    public function indexByClient( $id ) {
+    public function index() {
 
-        $directions = DB::select('exec pa_readDirections ?', [$id]);
+        $directions = DB::select('exec pa_readDirections');
 
         return response()->json([
             'code'      => 200,

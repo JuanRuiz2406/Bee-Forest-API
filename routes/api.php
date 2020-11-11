@@ -49,4 +49,3 @@ Route::resource('order', OrderController::class);
 
 //Rutas de Direcicones
 Route::resource('direction', DirectionController::class);
-Route::get('direction/get-direction-client/{id}', [DirectionController::class, 'indexByClient']);
