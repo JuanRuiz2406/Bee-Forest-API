@@ -33,7 +33,7 @@ class MaterialController extends Controller
     public function show($materialId)
     {
 
-        $material = DB::select('exect pa_selectMaterial', $materialId);
+        $material = DB::select('exect pa_selectMaterialByName', $materialId);
 
         if (is_object($material)) {
             $data = [
