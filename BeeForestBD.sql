@@ -1502,6 +1502,24 @@ END
 
 GO
 
+-- SELECT By IdentificationCardClient
+CREATE PROCEDURE pa_selectIdentificationCardClient
+	@identificationCard NVARCHAR(255),
+	@email NVARCHAR(255)
+AS
+BEGIN
+	-- Validación ID existe
+    IF NOT EXISTS(SELECT id
+                  FROM clients
+                  WHERE identificationCard = @identificationCard OR email = @email)
+            SELECT 'El ID del Cliente no existe' AS status;
+        -- Select
+        ELSE
+        	SELECT * FROM clients WHERE identificationCard = @identificationCard OR email = @email
+END
+
+GO
+
 -- UPDATE
 CREATE PROCEDURE pa_updateClient
 	@id UNIQUEIDENTIFIER,
@@ -1510,7 +1528,6 @@ CREATE PROCEDURE pa_updateClient
 	@surname NVARCHAR(255),
 	@telephone NVARCHAR(255),
 	@email NVARCHAR(255),
-	@created_at DATETIME,
 	@updated_at DATETIME
 AS
 BEGIN
@@ -1520,6 +1537,7 @@ BEGIN
 END
 
 GO
+exec pa_updateClient "0B8A4790-2478-11EB-8C7B-417A5D641514","11223","Juan","Ruiz","892","juanruizh@gmail.com","2020-11-11 23:45:57.323"
 
 -- DELETE
 CREATE PROCEDURE pa_deleteClient
