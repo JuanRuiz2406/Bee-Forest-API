@@ -1251,7 +1251,7 @@ GO
 CREATE PROCEDURE pa_readCollaborators
 AS
 BEGIN
-	SELECT id, username, email, role FROM collaborators WHERE role = 'standart'
+	SELECT id, username, email, role FROM collaborators
 END
 
 GO

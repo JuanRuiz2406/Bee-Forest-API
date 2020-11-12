@@ -34,6 +34,7 @@ Route::post('collaborator/login', [CollaboratorController::class, 'login']);
 Route::put('collaborator/update',  [CollaboratorController::class, 'update']);
 Route::delete('collaborator/delete/{id}',  [CollaboratorController::class, 'destroy'])->middleware(ApiAuthMiddleware::class);
 Route::get('collaborator/detail/{id}', [CollaboratorController::class, 'detail'])->middleware(ApiAuthMiddleware::class);
+Route::get('collaborator/all', [CollaboratorController::class, 'index'])->middleware(ApiAuthMiddleware::class);
 
 Route::resource('product', ProductController::class); //CRUD
 Route::get('product/get-material/{id}', [ProductController::class, 'getMaterialByProduct']); //CRUD
