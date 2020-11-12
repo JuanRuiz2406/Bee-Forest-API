@@ -1848,6 +1848,25 @@ GO
 -- No borrar materiales que tengan relaciones con productos
 
 PRINT 'Creando Trigger de resta de materiales al añadir x cantidad de productos'
+CREATE TRIGGER dis_deleteMaterialRelation
+ON materials
+INSTEAD OF DELETE
+AS
+BEGIN
+	DECLARE @quantity INT, @id BIGINT
+
+	SELECT @id = id FROM deleted
+
+    IF ((SELECT COUNT(materialId)
+		 FROM product_material
+		 WHERE id = @id) > 0)
+	BEGIN
+		RAISERROR('Error... No se puede borrar un material que tenga productos asociados', 16, 1)
+		ROLLBACK TRANSACTION
+	END
+
+END
+
 GO
 
 -- Restar materiales al insertar producto
