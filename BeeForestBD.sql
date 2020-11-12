@@ -1537,7 +1537,6 @@ BEGIN
 END
 
 GO
-exec pa_updateClient "0B8A4790-2478-11EB-8C7B-417A5D641514","11223","Juan","Ruiz","892","juanruizh@gmail.com","2020-11-11 23:45:57.323"
 
 -- DELETE
 CREATE PROCEDURE pa_deleteClient
