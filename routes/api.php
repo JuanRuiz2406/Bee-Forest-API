@@ -31,7 +31,7 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 
 Route::post('collaborator/register', [CollaboratorController::class, 'register']);
 Route::post('collaborator/login', [CollaboratorController::class, 'login']);
-Route::put('collaborator/update',  [CollaboratorController::class, 'update']);
+Route::put('collaborator/update/{id}',  [CollaboratorController::class, 'update']);
 Route::delete('collaborator/delete/{id}',  [CollaboratorController::class, 'destroy'])->middleware(ApiAuthMiddleware::class);
 Route::get('collaborator/detail/{id}', [CollaboratorController::class, 'detail'])->middleware(ApiAuthMiddleware::class);
 Route::get('collaborator/all', [CollaboratorController::class, 'index'])->middleware(ApiAuthMiddleware::class);

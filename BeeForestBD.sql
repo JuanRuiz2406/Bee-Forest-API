@@ -1263,7 +1263,7 @@ AS
 BEGIN
 	-- Validación ID existe
     IF NOT EXISTS(SELECT id
-                  FROM clients
+                  FROM collaborators
                   WHERE id = @id)
             SELECT 'El ID del Colaborador no existe' AS status;
         -- Select

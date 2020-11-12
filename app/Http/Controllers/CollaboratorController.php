@@ -146,7 +146,7 @@ class CollaboratorController extends Controller{
     }
 
     //UPDATE
-    public function update(Request $request){
+    public function update(Request $request, $id){
 
         $token = $request->header('Authorization');
         $jwtAuth = new \JwtAuth();
@@ -161,18 +161,17 @@ class CollaboratorController extends Controller{
             $params_array =  (array) $params;
 
             $validate = \Validator::make($params_array, [
-                'username'  => 'required|unique:collaborators' . $collaborator->id,
+                'username'  => 'required|unique:collaborators,username,'.$id,
                 'email'     => 'required|email',
                 'password'  => 'required',
             ]);
 
-            $unique = DB::select('exec pa_selectUserNameCollaborator ? ', [$params->username]);
-
-            if ((count($unique) > 0) && ($collaborator->username != $unique[0]->username)) {
+            if ($validate->fails()) {
                 $data = array(
-                    'code'      => 404,
+                    'code'      => 200,
                     'status'    => 'error',
-                    'message'   => 'El nombre de usuario del colaborador ya existe en el sistema.'
+                    'message'   => 'Problemas.',
+                    'data'      => $validate->errors()
                 );
             return response()->json($data, $data['code']);
             }
@@ -192,7 +191,7 @@ class CollaboratorController extends Controller{
             $params_array['updated_at'] = new \DateTime();
 
             DB::update('exec pa_updateCollaborator ?, ?, ?, ?, ?, ?', [
-                $params_array['id'],
+                $id,
                 $params_array['username'],
                 $params_array['password'],
                 $params_array['email'],
@@ -204,7 +203,6 @@ class CollaboratorController extends Controller{
                 'code'          => 200,
                 'status'        => 'success',
                 'message'       => 'Colaborador actualizado correctamente.',
-                'collaborator'  => $collaborator,
                 'data'          => $params_array
             );
         } else {
@@ -223,6 +221,7 @@ class CollaboratorController extends Controller{
 
         $collaborator = DB::select('exec pa_selectCollaborator ?', [$id]);
 
+        var_dump($collaborator);
         if (count($collaborator) > 0) {
 
             if($collaborator[0]->role != 'admin'){
