@@ -52,7 +52,7 @@ class ProviderController extends Controller
         if (count($provider) > 0) {
             $data = [
                 'code'      => 200,
-                'status'    => 'success.',
+                'status'    => 'success',
                 'message'    => 'Proveedor encontrado correctamente.',
                 'data'   => $provider
             ];

@@ -222,9 +222,9 @@ class MaterialController extends Controller
         } else {
             $image_name = time() . $image->getClientOriginalName();
 
-            \Storage::disk('material')->put($image_name, \File::get($image));
+            \Storage::disk('materials')->put($image_name, \File::get($image));
 
-            DB::update('UPDATE material SET image = ? WHERE id = ? ', [$image_name, $id]);
+            DB::update('UPDATE materials SET image = ? WHERE id = ? ', [$image_name, $id]);
             $data = [
                 'code' => 200,
                 'status' => 'success',
@@ -239,11 +239,11 @@ class MaterialController extends Controller
     public function getImage($filename)
     {
         // Comprobar si existe el fichero
-        $isset = \Storage::disk('material')->exists($filename);
+        $isset = \Storage::disk('materials')->exists($filename);
 
         if ($isset) {
             // Conseguir la imagen
-            $file = \Storage::disk('material')->get($filename);
+            $file = \Storage::disk('materials')->get($filename);
 
             // Devolver la imagen
             return new Response($file, 200);
