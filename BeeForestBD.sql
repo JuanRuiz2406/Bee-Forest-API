@@ -364,7 +364,7 @@ PRINT 'Creando usuario administrador en la tabla Colaboradores'
 GO
 
 INSERT INTO collaborators VALUES
-	('FF605560-E5BC-11EA-8530-EF0B356FE153','admin','FF605560-E5BC-11EA-8530-EF0B356FE153','admin@admin.com','admin',
+	('FF605560-E5BC-11EA-8530-EF0B356FE153','admin','189f40034be7a199f1fa9891668ee3ab6049f82d38c68be70f596eab2e1857b7','admin@admin.com','admin',
 	'2020-08-23 21:50:48.970','2020-08-23 21:50:48.970')
 
 -- ------------------------------------------------------------------------ --
