@@ -41,6 +41,9 @@ Route::get('product/get-material/{id}', [ProductController::class, 'getMaterialB
 Route::post('product/upload/{id}', [ProductController::class, 'upload']);
 Route::get('product/image/{filename}', [ProductController::class, 'getImage']);
 
+Route::post('material/upload/{id}', [ProductController::class, 'upload']);
+Route::get('material/image/{filename}', [ProductController::class, 'getImage']);
+
 Route::resource('client', ClientController::class); //CRUD
 Route::resource('provider', ProviderController::class); //CRUD
 Route::resource('material', MaterialController::class);

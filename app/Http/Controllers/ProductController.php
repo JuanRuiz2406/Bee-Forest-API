@@ -11,7 +11,10 @@ use App\Helpers\JwtAuth;
 class ProductController extends Controller
 {
 
-    public function __construct(){ $this->middleware('api.auth',['except' => ['getImage']]); }
+    public function __construct()
+    {
+        $this->middleware('api.auth', ['except' => ['getImage']]);
+    }
 
     //GET ALL
     public function index()
@@ -166,7 +169,7 @@ class ProductController extends Controller
 
             $validate = \Validator::make($params_array, [
                 'categoryId'    => 'required',
-                'name'          => 'required|unique:products,name,'.$id,
+                'name'          => 'required|unique:products,name,' . $id,
                 'price'         => 'required',
                 'amount'        => 'required',
             ]);
@@ -179,64 +182,62 @@ class ProductController extends Controller
                     'data'      => $validate->errors()
                 ];
             } else {
-                    //recorrmos el array de materials (todos los materiales para crear un producto)
-                    foreach ($params_array['materials'] as $key => $value) {
+                //recorrmos el array de materials (todos los materiales para crear un producto)
+                foreach ($params_array['materials'] as $key => $value) {
 
-                        //Por cada vuelta buscar por id en materiales
-                        $material = DB::select('exec pa_selectMaterial ?',  [$value['materialId']]);
+                    //Por cada vuelta buscar por id en materiales
+                    $material = DB::select('exec pa_selectMaterial ?',  [$value['materialId']]);
 
-                        //cantidad de materiales - cantidad de productos por cantidad de materiales da negativo
-                        if(($material[0]->amount - ($params_array['amount'] * $value['materialAmount'])) >= 0){
+                    //cantidad de materiales - cantidad de productos por cantidad de materiales da negativo
+                    if (($material[0]->amount - ($params_array['amount'] * $value['materialAmount'])) >= 0) {
 
-                            //Insertamos en la tabla intermedia
-                            DB::insert('insert into product_material (productId, materialId, amount, created_at, updated_at) values (?,?,?,?,?)', [
-                                $id,
-                                $value['id'],
-                                $value['materialAmount'],
-                                new \DateTime(),
-                                new \DateTime()
-                            ]);
-                       
-                            //Hacemos el update de la nueva contidad en meterilas
-                            DB::insert('update materials set amount = ? where id = ?', [
-                                $material[0]->amount - ($params_array['amount']  * $value['materialAmount']),
-                                $value['materialId'],
-                            ]);
-                        }else{
+                        //Insertamos en la tabla intermedia
+                        DB::insert('insert into product_material (productId, materialId, amount, created_at, updated_at) values (?,?,?,?,?)', [
+                            $id,
+                            $value['id'],
+                            $value['materialAmount'],
+                            new \DateTime(),
+                            new \DateTime()
+                        ]);
 
-                            $data = [
-                                'code' => 200,
-                                'status' => 'error',
-                                'message' => 'La cantidad de materiales para crear el producto no es suficiente'
-                            ];
+                        //Hacemos el update de la nueva contidad en meterilas
+                        DB::insert('update materials set amount = ? where id = ?', [
+                            $material[0]->amount - ($params_array['amount']  * $value['materialAmount']),
+                            $value['materialId'],
+                        ]);
+                    } else {
 
-                            return response()->json($data, $data['code']);
+                        $data = [
+                            'code' => 200,
+                            'status' => 'error',
+                            'message' => 'La cantidad de materiales para crear el producto no es suficiente'
+                        ];
 
-                        }
-
+                        return response()->json($data, $data['code']);
                     }
+                }
 
-                            unset($params_array['id']);
-                            unset($params_array['created_at']);
-                            $params_array['updated_at'] = new \DateTime();
+                unset($params_array['id']);
+                unset($params_array['created_at']);
+                $params_array['updated_at'] = new \DateTime();
 
 
-                            DB::update('exec pa_updateProduct ?,?,?,?,?,?,?', [
-                                $id,
-                                $params_array['categoryId'],
-                                $params_array['name'],
-                                $params_array['price'],
-                                $params_array['amount'],
-                                $params_array['description'],
-                                $params_array['updated_at']
-                            ]);
+                DB::update('exec pa_updateProduct ?,?,?,?,?,?,?', [
+                    $id,
+                    $params_array['categoryId'],
+                    $params_array['name'],
+                    $params_array['price'],
+                    $params_array['amount'],
+                    $params_array['description'],
+                    $params_array['updated_at']
+                ]);
 
-                            $data = [
-                                'code'      => 200,
-                                'status'    => 'success',
-                                'message'   => 'Producto actualizado correctamente.',
-                                'data'      => $params_array
-                            ];
+                $data = [
+                    'code'      => 200,
+                    'status'    => 'success',
+                    'message'   => 'Producto actualizado correctamente.',
+                    'data'      => $params_array
+                ];
             }
         } else {
             $data = [
@@ -285,27 +286,28 @@ class ProductController extends Controller
         return response()->json($data, $data['code']);
     }
 
-    public function upload(Request $request, $id){
+    public function upload(Request $request, $id)
+    {
         // Recoger la imagen de la petición
         $image = $request->file('file0');
-        
+
         // Validar imagen
         $validate = \Validator::make($request->all(), [
-           'file0' => 'required|image|mimes:jpg,jpeg,png,gif' 
+            'file0' => 'required|image|mimes:jpg,jpeg,png,gif'
         ]);
-    
+
         // Guardar la imagen
-        if(!$image || $validate->fails()){
+        if (!$image || $validate->fails()) {
             $data = [
                 'code' => 400,
                 'status' => 'error',
                 'message' => 'Error al subir la imagen'
             ];
-        }else{
-            $image_name = time().$image->getClientOriginalName();
-            
+        } else {
+            $image_name = time() . $image->getClientOriginalName();
+
             \Storage::disk('products')->put($image_name, \File::get($image));
-        
+
             DB::update('UPDATE products SET image = ? WHERE id = ? ', [$image_name, $id]);
             $data = [
                 'code' => 200,
@@ -313,12 +315,13 @@ class ProductController extends Controller
                 'image' => $image_name
             ];
         }
-        
+
         // Devolver datos
         return response()->json($data, $data['code']);
     }
 
-    public function getMaterialByProduct($id){
+    public function getMaterialByProduct($id)
+    {
 
         $materials = DB::select('SELECT  materials.id, materials.name, product_material.amount FROM product_material
         INNER JOIN materials ON  materials.id = product_material.materialId
@@ -328,27 +331,27 @@ class ProductController extends Controller
             'status' => 'success',
             'data' => $materials
         ], 200);
-
     }
 
-    public function getImage($filename){
+    public function getImage($filename)
+    {
         // Comprobar si existe el fichero
         $isset = \Storage::disk('products')->exists($filename);
-        
-        if($isset){
+
+        if ($isset) {
             // Conseguir la imagen
             $file = \Storage::disk('products')->get($filename);
-            
+
             // Devolver la imagen
             return new Response($file, 200);
-        }else{
+        } else {
             $data = [
                 'code' => 404,
                 'status' => 'error',
                 'message' => 'La imagen no existe'
             ];
         }
-        
+
         return response()->json($data, $data['code']);
     }
 }

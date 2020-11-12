@@ -10,10 +10,14 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB; // Con esto podemos hacer consultas por sql
 use Uuid; //Generamos ID unico para cada registro
 
-class ProviderController extends Controller {
+class ProviderController extends Controller
+{
 
 
-    public function __construct(){ $this->middleware('api.auth'); }
+    public function __construct()
+    {
+        $this->middleware('api.auth');
+    }
 
     /**
      * Display a listing of the resource.
@@ -21,7 +25,8 @@ class ProviderController extends Controller {
      * @return \Illuminate\Http\Response
      */
     //GET ALL
-    public function index() {
+    public function index()
+    {
 
         $providers = DB::select('exec pa_readProviders');
 
@@ -39,9 +44,10 @@ class ProviderController extends Controller {
      * @return \Illuminate\Http\Response
      */
     //GET ONE
-    public function show($id){
+    public function show($name)
+    {
 
-        $provider = DB::select('exec pa_selectProviderById ?', [$id]);
+        $provider = DB::select('select * from providers where name = ?', [$name]);
 
         if (count($provider) > 0) {
             $data = [
@@ -68,7 +74,8 @@ class ProviderController extends Controller {
      * @return \Illuminate\Http\Response
      */
     //POST
-    public function store(Request $request) {
+    public function store(Request $request)
+    {
 
         $json = $request->input('json', null);
         $params = json_decode($json);
@@ -76,8 +83,8 @@ class ProviderController extends Controller {
 
         if (!empty($params) && !empty($params_array)) {
 
-              // Validar datos
-              $validate = \Validator::make($params_array, [
+            // Validar datos
+            $validate = \Validator::make($params_array, [
                 'name'      => 'required',
                 'surname'   => 'required',
                 'telephone' => 'required',
@@ -96,7 +103,6 @@ class ProviderController extends Controller {
                     'message'   => 'Error, hay campos vacíos o no cumplen los requisitos.',
                     'data'      => $validate->errors()
                 );
-
             } else {
 
                 $params_array['id'] = Uuid::generate()->string;
@@ -144,7 +150,8 @@ class ProviderController extends Controller {
      * @return \Illuminate\Http\Response
      */
     //UPDATE
-    public function update($id, Request $request){
+    public function update($id, Request $request)
+    {
         $json = $request->input('json', null);
         $params = json_decode($json);
         $params_array = json_decode($json, true);
@@ -229,7 +236,8 @@ class ProviderController extends Controller {
      * @return \Illuminate\Http\Response
      */
     //DELETE
-    public function destroy($id){
+    public function destroy($id)
+    {
         if (isset($id)) {
 
             $provider = DB::select('exec pa_selectProviderById ?', [$id]);
