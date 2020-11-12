@@ -1764,29 +1764,6 @@ END
 
 GO
 
-PRINT 'Creando Trigger de no borrado de materiales con cantidad mayor que 0'
-GO
-
--- No borrar materiales con stock
-CREATE TRIGGER dis_materialDelete
-ON materials
-FOR DELETE
-AS
-BEGIN
-	DECLARE @amount INT
-
-	SET @amount = (SELECT amount FROM deleted)
-
-	IF (@amount > 0)
-	BEGIN
-		RAISERROR('Error... No se puede borrar un material con cantidad mayor que 0', 16, 1)
-		ROLLBACK TRANSACTION
-	END
-
-END
-
-GO
-
 PRINT 'Creando Trigger de no borrado de categorias con productos relacionados'
 GO
 
@@ -1815,58 +1792,7 @@ END
 
 GO
 
-/*
-PRINT 'Creando Trigger de no borrado de productos con ordenes relacionadas'
-GO
-
--- No borrar productos que tengan relaciones con ventas
-drop TRIGGER dis_deleteProductRelation
-ON products
-INSTEAD OF DELETE
-AS
-BEGIN
-	DECLARE @id BIGINT
-
-	SELECT @id = id FROM deleted
-
-	IF ((SELECT COUNT(orderId)
-		 FROM product_order
-		 WHERE id = @id) > 0)
-	BEGIN
-		RAISERROR('Error... No se puede borrar un producto que tenga pedidos asociados', 16, 1)
-		ROLLBACK TRANSACTION
-	END
-
-END
-
-GO
-*/
-
 PRINT 'Creando Trigger de no borrado de materiales con productos relacionados'
-GO
-
--- No borrar materiales que tengan relaciones con productos
-
-PRINT 'Creando Trigger de resta de materiales al añadir x cantidad de productos'
-CREATE TRIGGER dis_deleteMaterialRelation
-ON materials
-INSTEAD OF DELETE
-AS
-BEGIN
-	DECLARE @quantity INT, @id BIGINT
-
-	SELECT @id = id FROM deleted
-
-    IF ((SELECT COUNT(materialId)
-		 FROM product_material
-		 WHERE id = @id) > 0)
-	BEGIN
-		RAISERROR('Error... No se puede borrar un material que tenga productos asociados', 16, 1)
-		ROLLBACK TRANSACTION
-	END
-
-END
-
 GO
 
 -- Restar materiales al insertar producto
@@ -1935,159 +1861,6 @@ END
 
 GO
 
-
-/*
-PRINT 'Creando Trigger de resta de productos al realizar ordenes'
-GO
-
--- Restar productos al realizar pedido
-CREATE TRIGGER dis_orderInsert
-ON orders
-FOR INSERT
-AS
-BEGIN
-	DECLARE @productId BIGINT, @orderId BIGINT, @updated_at DATETIME, @amount INT, @fail int,
-            @productName NVARCHAR(255), @productAmount INT, @actualAmount INT, @lessAmount INT
-    SELECT @orderId = id, @updated_at = updated_at FROM inserted
-
-    BEGIN TRANSACTION;
-
-    DECLARE cOrder CURSOR FOR
-    -- Consulta productos que se relacionan con la orden a realizar
-    SELECT productId, amount
-    FROM product_order
-    WHERE productId = @productId
-
-    -- Cursor
-	OPEN cOrder
-    FETCH cOrder INTO @productId, @productAmount
-    WHILE(@@FETCH_STATUS = 0)
-    BEGIN
-
-        -- Monto Productos y Monto a Restar
-        SET @actualAmount = (SELECT amount FROM products WHERE id = @productId)
-        SET @lessAmount = @amount * @productAmount
-
-        -- Si lo que tengo es mayor a lo que se necesita para crear la order,
-        -- ejecuto el P.A. para restar productos
-        IF(@actualAmount >= @lessAmount)
-        BEGIN
-            EXEC pa_updateLessAmountProduct @productId, @lessAmount, @updated_at
-        END
-        -- Si en algún momento no es suficiente, saco el nombre del producto,
-        -- y vamos al CANCEL
-        ELSE
-        BEGIN
-            SET @productName = (SELECT name FROM products WHERE id = @productId)
-			SELECT @fail = 1;
-            GOTO CANCEL
-        END
-
-        FETCH cOrder INTO @productId, @productAmount
-    END
-
-    -- En caso de que todo sucediera correctamente, liberar memoria y COMMIT
-    CLOSE cOrder
-    DEALLOCATE cOrder
-    COMMIT TRANSACTION;
-	SELECT @fail = 0;
-
-    -- En caso de redirigir aquí, Mostramos material insuficiente y Rollback
-	-- fail es para que no entre en caso de éxito
-    CANCEL:
-	IF (@fail = 1)
-	BEGIN
-		SELECT 'No tenemos *' + @productName + '* suficientes para crear la orden' AS status;
-		CLOSE cOrder
-		DEALLOCATE cOrder
-		ROLLBACK TRANSACTION;
-	END
-END
-
-GO
-
-PRINT 'Creando Trigger de suma de productos al realizar devoluciones'
-GO
-
-*/
--- Sumar productos al insertar devolucion
--- CREO QUE EL TRIGGER DE PRODUCT ORDERS ESTÁ MALO, REVISAR CON LAS PRUEBAS ANTES DE HACER ESTE
--- DEBEN SALTAR EN LA TABLA INTERMEDIA, NO EN LA TABLA PEDIDOS / DEVOLUCIONES
-/*
-CREATE TRIGGER dis_refundInsert
-ON product_refund
-FOR INSERT
-AS
-BEGIN
-	DECLARE @refundId BIGINT, @productId BIGINT, @orderId BIGINT, @amount INT, @fail int,
-            @productName NVARCHAR(255), @productAmount INT, @actualAmount INT, @lessAmount INT
-
-    SELECT @refundId = refundId, @amount = amount FROM inserted
-    SELECT @orderId = (SELECT orderId FROM refunds WHERE id = @refundId)
-
-    BEGIN TRANSACTION;
-
-    DECLARE cRefund CURSOR FOR
-    -- Consulta productos que se relacionan con la orden a realizar
-    SELECT productId, amount
-    FROM product_order
-    WHERE orderId = @orderId
-
-    -- Cursor
-	OPEN cRefund
-    FETCH cRefund INTO @productId, @productOrderAmount
-    WHILE(@@FETCH_STATUS = 0)
-    BEGIN
-
-        -- Monto Productos y Monto a Restar
-        SET @actualAmount = (SELECT amount FROM products WHERE id = @productId)
-        SET @lessAmount = @amount * @productAmount
-
-        -- Si lo que devuelvo es menor o igual a lo que se vendió,
-        -- ejecuto el P.A. para aumentar productos
-        IF(@actualAmount >= @lessAmount)
-        BEGIN
-            EXEC pa_updateLessAmountProduct @productId, @lessAmount, @updated_at
-        END
-        -- Si en algún momento no es suficiente, saco el nombre del producto,
-        -- y vamos al CANCEL
-        ELSE
-        BEGIN
-            SET @productName = (SELECT name FROM products WHERE id = @productId)
-			SELECT @fail = 1;
-            GOTO CANCEL
-        END
-
-        FETCH cRefund INTO @productId, @productAmount
-    END
-
-    -- En caso de que todo sucediera correctamente, liberar memoria y COMMIT
-    CLOSE cRefund
-    DEALLOCATE cRefund
-    COMMIT TRANSACTION;
-	SELECT @fail = 0;
-
-    -- En caso de redirigir aquí, Mostramos material insuficiente y Rollback
-	-- fail es para que no entre en caso de éxito
-    CANCEL:
-	IF (@fail = 1)
-	BEGIN
-		SELECT 'No tenemos *' + @productName + '* suficientes para crear la orden' AS status;
-		CLOSE cOrder
-		DEALLOCATE cOrder
-		ROLLBACK TRANSACTION;
-	END
-END
-
-GO
-*/
-
-
--- ESTE TRIGGER DEBERIA SER EN product_refund, EN CADA INSERCION QUE VALIDE SI EL AMOUNT ES VALIDO
--- CONSULTA: EMPEZANDO DESDE refund (ID) JOIN orders (ORDERID) JOIN product_order (SACAR AMOUNT Y PRODUCTID)
--- SI AMOUNT(product_refund) ES <= A AMOUNT(product_refund) INSERTAR
--- ELSE CANCEL
-
 PRINT 'Triggers de Auditoria - Pedidos'
 GO
 
@@ -2095,7 +1868,7 @@ CREATE TRIGGER Audit_insert_orders
 ON orders
 FOR INSERT
 AS
-    DECLARE @userAudit BIGINT, @orderId BIGINT, @shippingNew BIGINT,
+    DECLARE @userAudit NVARCHAR(255), @orderId BIGINT, @shippingNew BIGINT,
     @action NVARCHAR(255), @statusNew NVARCHAR(255), @created_at DATETIME
 
     SELECT @orderId = id, @shippingNew = ShippingId,
@@ -2111,7 +1884,7 @@ CREATE TRIGGER Audit_update_orders
 ON orders
 FOR UPDATE
 AS
-    DECLARE @userAudit BIGINT, @orderId BIGINT, @shippingOld BIGINT, @shippingNew BIGINT,
+    DECLARE @userAudit NVARCHAR(255), @orderId BIGINT, @shippingOld BIGINT, @shippingNew BIGINT,
     @action NVARCHAR(255), @statusOld NVARCHAR(255), @statusNew NVARCHAR(255), @created_at DATETIME
 
     SELECT @orderId = id, @shippingNew = ShippingId,
@@ -2155,7 +1928,7 @@ AS
 	@usernameNew NVARCHAR(255),	@emailOld NVARCHAR(255),
     @emailNew NVARCHAR(255), @created_at DATETIME
 
-    SELECT @collaboratorEditedId = id, @collaboratorEditedId = id,
+    SELECT @collaboratorEditedId = id, @usernameNew = username,
     @emailNew = email, @created_at = created_at FROM inserted
 
     SELECT @usernameOld = username, @emailOld = email FROM deleted
