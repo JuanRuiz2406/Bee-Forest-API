@@ -690,8 +690,8 @@ CREATE PROCEDURE pa_selectMaterialByName
 AS
 BEGIN
 	-- Validación ID existe
-    IF NOT EXISTS(SELECT id
-                  FROM clients
+    IF NOT EXISTS(SELECT *
+                  FROM materials
                   WHERE name = @name)
             SELECT 'El nombre del Material no existe' AS status;
         -- Select

@@ -30,12 +30,12 @@ class MaterialController extends Controller
     }
 
     //GET ONE
-    public function show($materialId)
+    public function show($materialName)
     {
 
-        $material = DB::select('exect pa_selectMaterialByName', $materialId);
+        $material = DB::select('exec pa_selectMaterialByName ?', [$materialName]);
 
-        if (is_object($material)) {
+        if (count($material) > 0) {
             $data = [
                 'code'      => 200,
                 'status'    => 'success',
