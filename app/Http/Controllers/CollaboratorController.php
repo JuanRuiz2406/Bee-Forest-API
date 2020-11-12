@@ -168,7 +168,7 @@ class CollaboratorController extends Controller{
 
             if ($validate->fails()) {
                 $data = array(
-                    'code'      => 200,
+                    'code'      => 400,
                     'status'    => 'error',
                     'message'   => 'Problemas.',
                     'data'      => $validate->errors()
